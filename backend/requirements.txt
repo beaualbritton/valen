@@ -1,6 +1,8 @@
 django
 django-rest-framework
-psycopg
+psycopg2-binary
 django-environ
 django-cors-headers
 pillow
+dj-database-url
+gunicorn
