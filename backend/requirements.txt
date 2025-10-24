@@ -6,3 +6,4 @@ django-cors-headers
 pillow
 dj-database-url
 gunicorn
+drf-spectacular

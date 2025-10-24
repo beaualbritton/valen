@@ -6,7 +6,7 @@ RUN mkdir /backend
 WORKDIR /backend
 
 #prevents python from buffering stdout and stderr
-ENV PYTHONBUFFERED=1
+ENV PYTHONUNBUFFERED=1
 
 #pip dependencies 
 RUN pip install --upgrade pip 
@@ -18,4 +18,5 @@ COPY backend/ .
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
+#gunicorn forwards stdout/sterr to logs
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--capture-output", "--enable-stdio-inheritance", "backend.wsgi:application"]
