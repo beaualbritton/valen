@@ -7,3 +7,4 @@ pillow
 dj-database-url
 gunicorn
 drf-spectacular
+pygit2

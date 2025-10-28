@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from api.views import create_repository, register_user, login_user, csrf_token, logout_user
+from api.views import fetch_repository
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,5 +25,6 @@ urlpatterns = [
     path('api/login/', login_user),
     path('api/csrf/', csrf_token),
     path('api/logout/', logout_user),
-    path('api/public/repo/create/', create_repository)
+    path('api/public/repo/create/', create_repository),
+    path('api/public/repo/by/<str:username>/<str:repository_name>/<str:oid>', fetch_repository)
 ]
