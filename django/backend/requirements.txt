@@ -1,0 +1,10 @@
+django
+django-rest-framework
+psycopg2-binary
+django-environ
+django-cors-headers
+pillow
+dj-database-url
+gunicorn
+drf-spectacular
+pygit2
