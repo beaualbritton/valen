@@ -18,5 +18,8 @@ COPY backend/ .
 
 EXPOSE 8000
 
+
+USER www-data
+
 #gunicorn forwards stdout/sterr to logs
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--capture-output", "--enable-stdio-inheritance", "backend.wsgi:application"]

@@ -11,7 +11,7 @@ def peel_commit(git_object) -> Response:
             entry_list.append({
                 "name": entry.name,
                 "type": entry.type_str,
-                "oid": entry.id,
+                "oid": str(entry.id),
             })
 
         return Response({
@@ -19,11 +19,11 @@ def peel_commit(git_object) -> Response:
             "object":
             {
                 "type": current_object.type_str,
-                "oid": current_object.id,
+                "oid": str(current_object.id),
                 "name": current_object.name,
                 "message": current_object.message,
                 "author": current_object.author.name,
-                "time":  current_object.commit_time,
+                "time":  str(current_object.commit_time),
                 "entries": entry_list,
             }
         })
@@ -40,7 +40,7 @@ def peel_tree(git_object) -> Response:
             entry_list.append({
                 "name": entry.name,
                 "type": entry.type_str,
-                "oid": entry.id,
+                "oid": str(entry.id),
             })
 
         return Response({
@@ -48,7 +48,7 @@ def peel_tree(git_object) -> Response:
             "object":
             {
                 "type": current_object.type_str,
-                "oid": current_object.id,
+                "oid": str(current_object.id),
                 "name": current_object.name,
                 "entries": entry_list,
             }
@@ -65,9 +65,9 @@ def peel_blob(git_object) -> Response:
             "object":
             {
                 "type": current_object.type_str,
-                "oid": current_object.id,
+                "oid": str(current_object.id),
                 "name": current_object.name,
-                "entries": current_object.data
+                "entries": current_object.data.decode('utf-8')
             }
         })
     except Exception as error:

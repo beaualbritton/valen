@@ -26,5 +26,6 @@ urlpatterns = [
     path('api/csrf/', csrf_token),
     path('api/logout/', logout_user),
     path('api/public/repo/create/', create_repository),
-    path('api/public/repo/by/<str:username>/<str:repository_name>/<str:oid>', fetch_repository)
+    path('api/public/repo/by/<str:username>/<str:repository_name>/', fetch_repository),
+    path('api/public/repo/by/<str:username>/<str:repository_name>/<str:oid>/', fetch_repository)
 ]
