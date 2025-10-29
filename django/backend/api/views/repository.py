@@ -4,6 +4,7 @@ from api.lib.server.directory import get_user_dir
 import subprocess
 from pathlib import Path
 from pygit2 import Repository, Commit, Tree, repository
+from api.lib.git_objects import peel_commit, peel_blob, peel_tree
 
 # Create your views here. 
 #
@@ -47,7 +48,7 @@ def delete_repository(request):
 
 
 @api_view(["GET"])
-def fetch_repository(request, username, repository_name, oid="HEAD"):
+def fetch_repository(request, username, repository_name, oid="HEAD") -> Response :
 
     repo_path = Path(GIT_ROOT/username/f"{repository_name}.git/")
     git_repo = Repository(str(repo_path))
@@ -63,37 +64,15 @@ def fetch_repository(request, username, repository_name, oid="HEAD"):
 
     match object_type:
         case "commit":
-            current_object = current_object.peel(Commit)
-            entry_list = []
-
-            for entry in current_object.tree:
-                entry_list.append({
-                    "name": entry.name,
-                    "type": entry.type_str,
-                    "oid": entry.id,
-                })
-
-            return Response({
-                "status": True,
-                "object":
-                {
-                    "type": current_object.type_str,
-                    "oid": current_object.id,
-                    "message": current_object.message,
-                    "author": current_object.author.name,
-                    "time":  current_object.commit_time,
-                    "entries": entry_list,
-                }
-            })
-
+            return peel_commit(current_object)
         case "tree":
-            print("tree")
+            return peel_tree(current_object)
         case "blob":
-            print("blob")
+            return peel_blob(current_object)
         case "tag":
+            #TODO: implement 
             print("tag")
-        case _:
-            print("not a valid git object")
+    return Response({"status": False, "message": "not a valid git object"})
 
 
 
