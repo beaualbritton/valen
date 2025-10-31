@@ -1,16 +1,15 @@
 <script lang="ts">
-import { fetchRepository } from "$lib/repository";
 let {data} = $props()
 let repository = $state(data.repoData)
 let user = $state(data.username)
 let repoName = $state(data.repoName)
 let root = $derived(repository.response.object)
 
-async function fetch(objectId: string)
-{
-  let response = fetchRepository(user, repoName, objectId)
-  repository = await response
-  console.log(response)
+async function refetch(objectId : string) {
+
+  const query = `?oid=${encodeURIComponent(objectId)}`;
+  const res = await fetch(`/${user}/${repoName}/refetch${query}`);
+  repository = await res.json();
 }
 </script>
 
@@ -24,7 +23,7 @@ async function fetch(objectId: string)
   {:else}
     {#each root.entries as entry}
       <ul>
-        <li><a on:click={() => fetch(entry.oid)} class="underline">{entry.name}</a></li>
+        <li><a on:click={() => refetch(entry.oid)} class="underline">{entry.name}</a></li>
       </ul>
     {/each}
   {/if}
