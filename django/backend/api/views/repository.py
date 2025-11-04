@@ -77,7 +77,7 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
 
 
 @api_view(["GET"])
-def fetch_repos_by_user(username):
+def fetch_repos_by_user(request, username):
     user_exists: bool = User.objects.filter(username=username).exists()
     if not user_exists:
         return Response({"status": False, "message": f"{username} doesn't exist"})
