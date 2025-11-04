@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.contrib.auth.models import User
 from api.lib.server.directory import get_user_dir
 import subprocess
 from pathlib import Path
@@ -75,4 +76,15 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
     return Response({"status": False, "message": "not a valid git object"})
 
 
+@api_view(["GET"])
+def fetch_repos_by_user(username):
+    user_exists: bool = User.objects.filter(username=username).exists()
+    if not user_exists:
+        return Response({"status": False, "message": f"{username} doesn't exist"})
 
+    user_dir = Path(GIT_ROOT/username)
+    repos = []
+    for child in user_dir.iterdir():
+        repos.append(str(child))
+
+    return Response({"status": True, "repositories": repos})
