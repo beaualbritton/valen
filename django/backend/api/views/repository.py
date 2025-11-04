@@ -80,11 +80,12 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
 def fetch_repos_by_user(request, username):
     user_exists: bool = User.objects.filter(username=username).exists()
     if not user_exists:
-        return Response({"status": False, "message": f"{username} doesn't exist"})
+        return Response({"status": False, "message": f"{username} doesn't exist", "repositories": None})
 
     user_dir = Path(GIT_ROOT/username)
     repos = []
     for child in user_dir.iterdir():
-        repos.append(str(child))
+        if child.is_dir():
+            repos.append(child.stem)
 
     return Response({"status": True, "repositories": repos})
