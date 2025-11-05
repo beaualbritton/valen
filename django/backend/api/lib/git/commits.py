@@ -8,7 +8,7 @@ def all_commits(git_repo) -> Response:
     for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TIME):
         current_commit = commit.peel(Commit)
         commits.append({
-            "oid": current_commit.id,
+            "oid": str(current_commit.id),
             "author": current_commit.author.name,
             "message": current_commit.message,
             "time": current_commit.commit_time})
@@ -24,7 +24,7 @@ def find_commit_refs(git_repo, git_object):
         for entry in commit.tree:
             if entry.id == git_object.id:
                 commit_refs.append({
-                    "oid": current_commit.id,
+                    "oid": str(current_commit.id),
                     "author": current_commit.author.name,
                     "message": current_commit.message,
                     "time": current_commit.commit_time})
@@ -40,7 +40,7 @@ def find_latest_ref(git_repo, git_object) -> Response:
         for entry in commit.tree:
             if entry.id == git_object.id:
                 latest_ref = {
-                    "oid": current_commit.id,
+                    "oid": str(current_commit.id),
                     "author": current_commit.author.name,
                     "message": current_commit.message,
                     "time": current_commit.commit_time}
