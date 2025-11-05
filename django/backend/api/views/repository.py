@@ -1,15 +1,14 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from api.lib.server.directory import get_user_dir
 import subprocess
 from pathlib import Path
 from pygit2 import Repository, Commit, Tree, repository
-from api.lib.git_objects import peel_commit, peel_blob, peel_tree
+from api.lib.git.peel import peel_commit, peel_blob, peel_tree
+from api.lib.server.directory import get_user_dir
 
-# Create your views here. 
-#
 GIT_ROOT = Path("/srv/git")
+
 
 @api_view(["POST"])
 def create_repository(request):
