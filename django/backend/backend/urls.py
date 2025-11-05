@@ -30,7 +30,7 @@ urlpatterns = [
     path('api/public/repo/by/<str:username>/<str:repository_name>/', fetch_repository),
     path('api/public/repo/by/<str:username>/<str:repository_name>/<str:oid>/', fetch_repository),
     path('api/public/repo/all/<str:username>/', fetch_repos_by_user),
-    path('api/public/repo/commits/<str:username>/<str:repository_name>/', fetch_commits_for_repo),
-    path('api/public/repo/commits/<str:username>/<str:repository_name>/<str:oid>/', fetch_commits_for_object),
-    path('api/public/repo/commits/<str:username>/<str:repository_name>/<str:oid>/latest', fetch_latest_commit_for_object),
+    path('api/public/repo/commits/<str:username>/<str:repository>/', fetch_commits_for_repo),
+    path('api/public/repo/commits/<str:username>/<str:repository>/<str:oid>/', fetch_commits_for_object),
+    path('api/public/repo/commits/<str:username>/<str:repository>/<str:oid>/latest', fetch_latest_commit_for_object),
 ]
