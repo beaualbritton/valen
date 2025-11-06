@@ -9,7 +9,7 @@ let entryMap = $state<Record <string, any>>({});
 // Effects run whenever a state is updated. In this case, whenever root changes (handled by parent. FileTree just observes)
 // https://svelte.dev/docs/svelte/$effect
 $effect(() => {
-    if (!root?.entries) return;
+    if (!root?.entries || root.type == "blob") return;
 
     //Asynchronous function that maps the latest info with new entries upon FileTree navigation
     (async () =>
