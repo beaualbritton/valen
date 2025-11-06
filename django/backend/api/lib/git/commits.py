@@ -21,13 +21,12 @@ def find_commit_refs(git_repo, git_object):
     commit_refs = []
     for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TIME):
         current_commit = commit.peel(Commit)
-        for entry in commit.tree:
-            if contains_object(current_commit.tree, git_object.id):
-                commit_refs.append({
-                    "oid": str(current_commit.id),
-                    "author": current_commit.author.name,
-                    "message": current_commit.message,
-                    "time": current_commit.commit_time})
+        if contains_object(git_repo, current_commit.tree, git_object.id):
+            commit_refs.append({
+                "oid": str(current_commit.id),
+                "author": current_commit.author.name,
+                "message": current_commit.message,
+                "time": current_commit.commit_time})
 
     return Response({"status": True, "commits": commit_refs})
 
@@ -37,24 +36,23 @@ def find_latest_ref(git_repo, git_object) -> Response:
     latest_ref = None
     for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TIME):
         current_commit = commit.peel(Commit)
-        for entry in commit.tree:
-            if contains_object(current_commit.tree, git_object.id):
-                latest_ref = {
-                    "oid": str(current_commit.id),
-                    "author": current_commit.author.name,
-                    "message": current_commit.message,
-                    "time": current_commit.commit_time}
-                break
-
+        if contains_object(git_repo, current_commit.tree, git_object.id):
+            latest_ref = {
+                "oid": str(current_commit.id),
+                "author": current_commit.author.name,
+                "message": current_commit.message,
+                "time": current_commit.commit_time}
+            break
     return Response({"status": True, "commits": latest_ref})
 
 
 # recursive tree search for latest refs
-def contains_object(tree, oid):
+def contains_object(repo, tree, oid):
     for entry in tree:
         if entry.id == oid:
             return True
-        else:
-            if entry.type_str == "tree" and contains_object(entry, oid):
+        elif entry.type_str == "tree":
+            subtree = repo[entry.id]
+            if contains_object(repo, subtree, oid):
                 return True
     return False
