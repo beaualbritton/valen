@@ -1,19 +1,31 @@
 from pygit2 import Repository, Commit, GIT_SORT_TIME
 from rest_framework.response import Response
 
-#TODO: update to fetch all commits 
 
 # find all commits in a repo
 def all_commits(git_repo) -> Response:
     commits = []
-    for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TIME):
-        current_commit = commit.peel(Commit)
-        commits.append({
-            "oid": str(current_commit.id),
-            "author": current_commit.author.name,
-            "message": current_commit.message,
-            "time": current_commit.commit_time})
+    visited_commits = set()
 
+    for branches in git_repo.branches.local:
+        branch = git_repo.branches[branches]
+        branch_oid = branch.target
+
+        for commit in git_repo.walk(branch_oid, GIT_SORT_TIME):
+            # if commit has already been visited -- skip
+            if commit in visited_commits:
+                continue
+            visited_commits.add(commit.id)
+            current_commit = commit.peel(Commit)
+            commits.append({
+                "oid": str(current_commit.id),
+                "author": current_commit.author.name,
+                "message": current_commit.message,
+                "time": current_commit.commit_time})
+
+    # was stuck on this one for a while, want to sort commits by commit_time, git_sort_time isn't doing this
+    # see: https://stackoverflow.com/questions/72899/how-can-i-sort-a-list-of-dictionaries-by-a-value-of-the-dictionary-in-python
+    commits.sort(key=(lambda commit: commit["time"]), reverse=True)
     return Response({"status": True, "commits": commits})
 
 
