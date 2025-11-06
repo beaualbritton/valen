@@ -1,6 +1,6 @@
 //See: https://svelte.dev/docs/kit/routing
 import type { RequestHandler } from './$types';
-import { fetchAllCommits } from '$lib/api/commits';
+import { fetchDefaultBranch} from '$lib/api/branches';
 
 export const GET: RequestHandler = async ({ params, url }) => 
 {
@@ -8,7 +8,7 @@ export const GET: RequestHandler = async ({ params, url }) =>
   const { user, repository } = params;
 
   //Important, calling on server
-  const response = await fetchAllCommits(user, repository);
+  const response = await fetchDefaultBranch(user, repository);
 
   return new Response(JSON.stringify(response), {headers: { 'Content-Type': 'application/json' }});
 };

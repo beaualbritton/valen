@@ -10,13 +10,21 @@ export const load : PageServerLoad = async ({ params, url, fetch}) =>
   const repoResponse = await fetchRepository(user, repository, objectId);
   
   const commitResponse = await fetch(`/${user}/${repository}/commits`);
-  const commits = await commitResponse.json()
+  const commits = await commitResponse.json();
+
+  const allBranchResponse = await fetch(`/${user}/${repository}/branches`);
+  const branches = await allBranchResponse.json();
+
+  const defaultBranchResponse= await fetch(`/${user}/${repository}/branches/default`);
+  const defaultBranch = await defaultBranchResponse.json();
 
   return {
     username: user, 
     repoName: repository, 
     repoData: repoResponse,
     commits: commits,
+    branches: branches,
+    default: defaultBranch,
     currentOid: objectId
   }
 }
