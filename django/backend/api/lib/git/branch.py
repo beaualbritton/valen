@@ -5,7 +5,7 @@ from rest_framework.response import Response
 # all branches for a repo
 def get_branches(git_repo) -> Response:
     branch_list = []
-    for branch_name in git_repo.branches.remote:
+    for branch_name in git_repo.branches:
         # something like list(repo.branches) returns STRS only, cant extract oid or any other metadata
         branch = git_repo.branches[branch_name]
         branch_list.append({
