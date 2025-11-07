@@ -1,6 +1,6 @@
 <script lang="ts">
 import FileView from "./file_view.svelte";
-let { root, handleRefetch, getLatest, setBlob = $bindable()} : {root: any, handleRefetch: (objectId: string) => void, getLatest: any, setBlob : any} = $props()
+let { root, handleRefetch, getLatest = $bindable()} : {root: any, handleRefetch: (objectId: string) => void, getLatest: any} = $props()
 
 // TypeScript utility sugar. Basically a Map object with types
 // https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type
@@ -54,7 +54,7 @@ $effect(() => {
     {#each root.entries as entry}
       <tr>
         <td>
-          <a onclick={() => handleRefetch(entry.oid)} class="hover:underline" href="">{entry.name}</a>
+          <a onclick={() => handleRefetch(entry.oid)} class="hover:underline">{entry.name}</a>
         </td>
         <td>
           {#if entryMap[entry.oid]}

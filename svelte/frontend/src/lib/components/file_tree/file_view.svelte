@@ -1,9 +1,15 @@
 <script lang="ts">
+import { HighlightAuto } from "svelte-highlight";
+import gruvboxLightHard from "svelte-highlight/styles/gruvbox-light-hard";
 let { blob = $bindable()} : {blob: any } = $props()
 
-let markdown = $derived(blob.entries.split("\n") || ' ');
+let code = blob.entries.split("\n").join("\n");
 </script>
 
-<section class = "h-64 overflow-scroll">
-  {@html markdown}
+<svelte:head>
+  {@html gruvboxLightHard}
+</svelte:head>
+
+<section class = "h-64 overflow-scroll rounded-lg">
+  <HighlightAuto {code} />
 </section>

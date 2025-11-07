@@ -11,8 +11,8 @@ let root = $derived(repository.response.object)
 let commits = $state(data.commits.response.commits)
 let branches = $state(data.branches.response.branches)
 let defaultBranch = $state(data.default.response.branches)
-let blob = $state(false)
-$inspect(branches)
+
+$inspect(root)
 $inspect(defaultBranch)
 
 async function refetch(objectId : string) 
@@ -39,7 +39,9 @@ async function getLatestFromObject(objectId : string)
   <div class = "min-h-screen flex flex-row items-center justify-center">
     <div class = "flex-col w-2/3">
       {#if root.type ==="blob"}
-        <FileView blob={root}/>
+        {#key root.oid}
+          <FileView blob={root}/>
+        {/key}
       {/if}
       <FileTree root={root} handleRefetch={refetch} getLatest={getLatestFromObject} />
     </div>

@@ -37,5 +37,8 @@
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.46.1",
 		"vite": "^7.1.12"
+	},
+	"dependencies": {
+		"svelte-highlight": "^7.9.0"
 	}
 }
