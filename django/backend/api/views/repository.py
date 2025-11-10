@@ -1,14 +1,14 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from api.lib.server.directory import get_user_dir
+from django.contrib.auth.models import User
 import subprocess
 from pathlib import Path
 from pygit2 import Repository, Commit, Tree, repository
-from api.lib.git_objects import peel_commit, peel_blob, peel_tree
+from api.lib.git.peel import peel_commit, peel_blob, peel_tree
+from api.lib.server.directory import get_user_dir
 
-# Create your views here. 
-#
 GIT_ROOT = Path("/srv/git")
+
 
 @api_view(["POST"])
 def create_repository(request):
@@ -75,4 +75,16 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
     return Response({"status": False, "message": "not a valid git object"})
 
 
+@api_view(["GET"])
+def fetch_repos_by_user(request, username):
+    user_exists: bool = User.objects.filter(username=username).exists()
+    if not user_exists:
+        return Response({"status": False, "message": f"{username} doesn't exist", "repositories": None})
 
+    user_dir = Path(GIT_ROOT/username)
+    repos = []
+    for child in user_dir.iterdir():
+        if child.is_dir():
+            repos.append(child.stem)
+
+    return Response({"status": True, "repositories": repos})

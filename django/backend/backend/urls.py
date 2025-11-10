@@ -17,7 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from api.views import create_repository, register_user, login_user, csrf_token, logout_user
-from api.views import fetch_repository
+from api.views import fetch_repository, fetch_repos_by_user
+from api.views import fetch_commits_for_repo, fetch_commits_for_object, fetch_latest_commit_for_object
+from api.views import fetch_all_branches, fetch_default_branch
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,5 +29,11 @@ urlpatterns = [
     path('api/logout/', logout_user),
     path('api/public/repo/create/', create_repository),
     path('api/public/repo/by/<str:username>/<str:repository_name>/', fetch_repository),
-    path('api/public/repo/by/<str:username>/<str:repository_name>/<str:oid>/', fetch_repository)
+    path('api/public/repo/by/<str:username>/<str:repository_name>/<str:oid>/', fetch_repository),
+    path('api/public/repo/all/<str:username>/', fetch_repos_by_user),
+    path('api/public/repo/commits/<str:username>/<str:repository>/', fetch_commits_for_repo),
+    path('api/public/repo/commits/<str:username>/<str:repository>/<str:oid>/', fetch_commits_for_object),
+    path('api/public/repo/commits/<str:username>/<str:repository>/<str:oid>/latest', fetch_latest_commit_for_object),
+    path('api/public/repo/branches/<str:username>/<str:repository>/', fetch_all_branches),
+    path('api/public/repo/branches/<str:username>/<str:repository>/default', fetch_default_branch)
 ]
