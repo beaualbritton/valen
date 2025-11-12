@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from api.views import create_repository, register_user, login_user, csrf_token, logout_user
+from api.views import create_repository, register_user, login_user, csrf_token, logout_user, get_user
 from api.views import fetch_repository, fetch_repos_by_user
 from api.views import fetch_commits_for_repo, fetch_commits_for_object, fetch_latest_commit_for_object
 from api.views import fetch_all_branches, fetch_default_branch
@@ -28,10 +28,11 @@ urlpatterns = [
     path('api/login/', login_user),
     path('api/csrf/', csrf_token),
     path('api/logout/', logout_user),
-    path('api/auth/git', git_authentication),
-    path('api/public/token/create', create_token),
-    path('api/public/token/delete', delete_token),
-    path('api/public/token/list', list_tokens),
+    path('api/user/', get_user),
+    path('api/auth/git/', git_authentication),
+    path('api/public/token/create/', create_token),
+    path('api/public/token/delete/', delete_token),
+    path('api/public/token/list/', list_tokens),
 
     path('api/public/repo/create/', create_repository),
     path('api/public/repo/by/<str:username>/<str:repository_name>/', fetch_repository),

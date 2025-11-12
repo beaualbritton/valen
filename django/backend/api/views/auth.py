@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User, make_password, check_password
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from api.serializers import UserSerializer
 from api.models import Profile
 from api.lib.server.directory import create_user_dir
 from api.models import Token
@@ -100,3 +101,12 @@ def git_authentication(request):
 
     # no tokens or headers are incorrect
     return Response(status=401)
+
+
+@api_view(["GET"])
+def get_user(request):
+    user = request.user
+    if not user or not user.is_authenticated:
+        return Response({"status": False, "message": "not logged in"})
+
+    return Response({"status": True, "user": UserSerializer(user).data})
