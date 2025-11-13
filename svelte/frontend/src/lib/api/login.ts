@@ -1,5 +1,6 @@
-import { API_URL } from "./config";
+import { API_URL } from "../config";
 let csrf : string;
+
 export async function getCsrf()
 {
   const csrfResponse= await fetch(`${API_URL}/api/csrf/`
@@ -53,4 +54,16 @@ export async function register(username:string, password: string)
   console.log(registerResponse)
 
   return {response: registerResponse};
+}
+
+export async function getUser(cookies: any)
+{
+  const { sessionId, csrfToken } = cookies;
+  const apiResponse = await fetch(`${API_URL}/api/user/`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
+  });
+  let userResponse= await apiResponse.json();
+
+  return {user: userResponse};
 }
