@@ -2,7 +2,8 @@ import base64
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User, make_password, check_password
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from api.serializers import UserSerializer
@@ -11,6 +12,12 @@ from api.lib.server.directory import create_user_dir
 from api.models import Token
 # aliases
 create_user = User.objects.create_user
+
+
+@api_view(["GET"])
+def check(request):
+    return Response(status=200)
+
 
 @api_view(["POST"])
 def register_user(request):
