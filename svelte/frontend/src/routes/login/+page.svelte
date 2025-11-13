@@ -1,7 +1,7 @@
 <script lang="ts">
 import LoginForm from "$lib/login/LoginForm.svelte";
 import { goto } from "$app/navigation";
-import {login} from "$lib/login";
+import {login} from "$lib/api/login";
 
 let status: any = $state();
 // Binds to onSubmit in LoginForm.svelte. Binding functions allows for dynamic behavior.
