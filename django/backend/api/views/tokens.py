@@ -29,7 +29,7 @@ def create_token(request):
     # using django's pw hash/salt
     hash = make_password(token)
 
-    token_entry = Token(user, name, hash, creation, expiration)
+    token_entry = Token(user=user, name=name, hash=hash, creation=creation, expiration=expiration)
     token_entry.save()
 
     return Response({"status": True, "token": token})

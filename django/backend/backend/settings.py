@@ -130,9 +130,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #CORS 
 
 CORS_ALLOWED_ORIGINS = [
+    "http://production-alb-996772037.us-east-2.elb.amazonaws.com",
+    "http://localhost:3000"
 ]
+
 CSRF_TRUSTED_ORIGINS = [
     "http://production-alb-996772037.us-east-2.elb.amazonaws.com",
+    "http://localhost:3000"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
