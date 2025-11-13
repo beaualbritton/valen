@@ -2,14 +2,22 @@ import base64
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User, make_password, check_password
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from api.serializers import UserSerializer
 from api.models import Profile
 from api.lib.server.directory import create_user_dir
 from api.models import Token
 # aliases
 create_user = User.objects.create_user
+
+
+@api_view(["GET"])
+def check(request):
+    return Response(status=200)
+
 
 @api_view(["POST"])
 def register_user(request):
@@ -100,3 +108,12 @@ def git_authentication(request):
 
     # no tokens or headers are incorrect
     return Response(status=401)
+
+
+@api_view(["GET"])
+def get_user(request):
+    user = request.user
+    if not user or not user.is_authenticated:
+        return Response({"status": False, "message": "not logged in"})
+
+    return Response({"status": True, "user": UserSerializer(user).data})
