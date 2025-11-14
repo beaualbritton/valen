@@ -1,5 +1,7 @@
 import base64
 from rest_framework.decorators import api_view
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -81,33 +83,42 @@ def csrf_token(request):
     return JsonResponse({"csrfToken": get_token(request)})
 
 
-@api_view(["GET"])
+@csrf_exempt
 def git_authentication(request):
     # git sends tokens thru http -> Authorization: Basic <base64hash>
-    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Authorization
-    header = request.headers.get('Authorization')
-    if not header:
-        return Response(status=401)
+    uri = request.META.get("HTTP_X_ORIGINAL_URI", "")
 
-    # find the base64 hash in the header, decode it and split
-    b64_decode = base64.b64decode(header[6:]).decode()
-    b64_decode = b64_decode.split(':', 1)
+    # return 401 with authenticate header by default
+    authenticate_res = HttpResponse(status=401)
+    authenticate_res["WWW-Authenticate"] = 'Basic realm="Git"'
 
-    username = b64_decode[0]
-    token = b64_decode[1]
-    hash = make_password(token)
+    if "git-upload-pack" in uri:
+        return HttpResponse(status=200)
 
-    user = User.objects.get(username=username)
-    if not user:
-        return Response(status=401)
-    user_tokens = Token.objects.filter(user=user)
+    if "git-receive-pack" in uri:
+        try:
+            auth = request.META.get("HTTP_AUTHORIZATION", "")
 
-    for token in user_tokens:
-        if check_password(hash, token.hash):
-            return Response(status=200)
+            if not auth.startswith("Basic "):
+                return authenticate_res
 
-    # no tokens or headers are incorrect
-    return Response(status=401)
+            b64_decode = base64.b64decode(auth[6:]).decode()
+            b64_decode = b64_decode.split(":", 1)
+
+            username = b64_decode[0]
+            auth_token = b64_decode[1]
+
+            user = User.objects.get(username=username)
+            user_tokens = Token.objects.filter(user=user)
+
+            for token in user_tokens:
+                if check_password(auth_token, token.hash):
+                    return HttpResponse(status=200)
+
+        except Exception:
+            return authenticate_res
+
+    return authenticate_res
 
 
 @api_view(["GET"])

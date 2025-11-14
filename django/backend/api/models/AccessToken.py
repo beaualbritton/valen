@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Token(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField()
     hash = models.CharField(max_length=255)
     creation = models.DateTimeField()
