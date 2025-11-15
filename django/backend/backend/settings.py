@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware'
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -126,22 +127,24 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#CORS 
+# CORS 
+# for production: cors is not flagged here, alb provides static domain
+# so alb-aws.com/<api> and alb-aws.com/<svelte> are the same 'origin'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://production-alb-996772037.us-east-2.elb.amazonaws.com",
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://production-alb-996772037.us-east-2.elb.amazonaws.com",
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_SAMESITE = None
+CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = False
+
+# for production: https://www.pythonanywhere.com/forums/topic/28605/
+# setting cached sessions so they are persistent
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
