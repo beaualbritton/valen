@@ -1,0 +1,38 @@
+services:
+  backend:
+    build: ./django
+    volumes:
+      - git-data:/srv/git
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    env_file:
+      - ./django/backend/.env
+    secrets:
+      - django_db 
+  git:
+    build: ./git-server
+    volumes:
+      - git-data:/srv/git
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+
+  frontend:
+    build: ./svelte
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - git
+    networks:
+      - app-network
+
+volumes:
+  git-data:
+
+networks:
+  app-network:
+    driver: bridge
