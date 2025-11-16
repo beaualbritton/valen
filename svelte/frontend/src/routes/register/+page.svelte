@@ -1,6 +1,6 @@
 <script lang="ts">
-import LoginForm from "$lib/login/LoginForm.svelte";
-import {register} from "$lib/login"
+import LoginForm from "$lib/components/LoginForm.svelte";
+import {register} from "$lib/api/login"
 let status: any= $state();
 let message: string = $state("")
 

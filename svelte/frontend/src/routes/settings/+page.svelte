@@ -11,7 +11,8 @@ async function requestToken()
   const expiration: Date = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const {response} = await createToken(name, expiration);
-  tokenResponse = response
+  tokenResponse = await response
+  console.log(tokenResponse)
 }
 </script>
 
@@ -22,6 +23,6 @@ settings
     create token?
   </button>
   {#if tokenResponse}
-    <p>tokenResponse</p>
+    <p>{tokenResponse.token}</p>
   {/if}
 </main>

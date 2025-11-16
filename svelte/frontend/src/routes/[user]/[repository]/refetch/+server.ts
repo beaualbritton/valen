@@ -1,6 +1,6 @@
 //See: https://svelte.dev/docs/kit/routing
 import type { RequestHandler } from './$types';
-import { fetchRepository } from '$lib/repository';
+import { fetchRepository } from '$lib/api/repository';
 
 export const GET: RequestHandler = async ({ params, url }) => 
 {

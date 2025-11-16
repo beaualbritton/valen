@@ -1,11 +1,12 @@
 import { API_URL } from "$lib/config";
-import { getCsrf } from "$lib/login";
+import { getCsrf } from "$lib/api/login";
 
 export async function createToken(name: string, expiration: Date)
 {
 
-  let csrfToken = await getCsrf()
-  const apiResponse = await fetch(`${API_URL}/api/public/token/create/`, {
+  let csrfToken = await getCsrf();
+
+  const apiResponse = await fetch(`${API_URL}/public/token/create/`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken},
       credentials: "include", 
@@ -19,7 +20,7 @@ export async function createToken(name: string, expiration: Date)
 export async function deleteToken(token: string)
 {
   let csrfToken = await getCsrf()
-  const apiResponse = await fetch(`${API_URL}/api/public/token/create/`, {
+  const apiResponse = await fetch(`${API_URL}/public/token/create/`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken},
       credentials: "include",
@@ -34,7 +35,7 @@ export async function deleteToken(token: string)
 export async function listTokens(cookies: any)
 {
   const { sessionId, csrfToken } = cookies;
-  const apiResponse = await fetch(`${API_URL}/api/public/token/list/`, {
+  const apiResponse = await fetch(`${API_URL}/public/token/list/`, {
       method: "GET",
       headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
   });

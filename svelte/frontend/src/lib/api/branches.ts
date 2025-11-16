@@ -2,7 +2,7 @@ import { API_URL } from "$lib/config";
 
 export async function fetchAllBranches(username: string, repository: string)
 {
-  let url = `${API_URL}/api/public/repo/branches/${username}/${repository}`
+  let url = `${API_URL}/public/repo/branches/${username}/${repository}`
 
   const apiResponse = await fetch(url, {
     method: "GET",
@@ -16,7 +16,7 @@ export async function fetchAllBranches(username: string, repository: string)
 
 export async function fetchDefaultBranch(username: string, repository: string)
 {
-  let url = `${API_URL}/api/public/repo/branches/${username}/${repository}/default`
+  let url = `${API_URL}/public/repo/branches/${username}/${repository}/default`
 
   const apiResponse = await fetch(url, {
     method: "GET",

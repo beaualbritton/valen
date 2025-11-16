@@ -1,9 +1,10 @@
 import { API_URL } from "$lib/config";
-import { getCsrf } from "$lib/login";
+import { getCsrf } from "$lib/api/login";
+
 export async function createRepository(repository: string)
 {
   let csrfToken = await getCsrf();
-  const apiResponse = await fetch(`${API_URL}/api/public/repo/create/`, {
+  const apiResponse = await fetch(`${API_URL}/public/repo/create/`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken},
     credentials: "include",
@@ -18,10 +19,10 @@ export async function createRepository(repository: string)
 
 export async function fetchRepository(username:string, repository: string, objectId: string | null)
 {
-  let url = `${API_URL}/api/public/repo/by/${username}/${repository}`
+  let url = `${API_URL}/public/repo/by/${username}/${repository}`
   if (objectId !== null)
   {
-    url = `${API_URL}/api/public/repo/by/${username}/${repository}/${objectId}`
+    url = `${API_URL}/public/repo/by/${username}/${repository}/${objectId}`
   }
   
   const apiResponse = await fetch(url, {
@@ -36,7 +37,7 @@ export async function fetchRepository(username:string, repository: string, objec
 
 export async function fetchAllRepositories(username: string)
 {
-  let url = `${API_URL}/api/public/repo/all/${username}/`
+  let url = `${API_URL}/public/repo/all/${username}/`
 
   const apiResponse = await fetch(url, {
     method: "GET",

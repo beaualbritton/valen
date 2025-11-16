@@ -1,5 +1,5 @@
 <script lang="ts">
-import LoginForm from "$lib/login/LoginForm.svelte";
+import LoginForm from "$lib/components/LoginForm.svelte";
 import { goto } from "$app/navigation";
 import {login} from "$lib/api/login";
 

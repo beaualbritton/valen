@@ -1,5 +1,5 @@
 import type {PageServerLoad} from './$types'
-import { fetchRepository } from '$lib/repository';
+import { fetchRepository } from '$lib/api/repository';
 
 //'fetch' in params to invoke SvelteKit's special SSR fetch.
 export const load : PageServerLoad = async ({ params, url, fetch}) => 

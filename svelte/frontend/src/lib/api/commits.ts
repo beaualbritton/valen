@@ -2,7 +2,7 @@ import { API_URL } from "$lib/config";
 
 export async function fetchAllCommits(username: string, repository: string)
 {
-  let url = `${API_URL}/api/public/repo/commits/${username}/${repository}`
+  let url = `${API_URL}/public/repo/commits/${username}/${repository}`
 
   const apiResponse = await fetch(url, {
     method: "GET",
@@ -16,7 +16,7 @@ export async function fetchAllCommits(username: string, repository: string)
 
 export async function fetchLatestCommitForObject(username: string, repository: string, oid: string | null)
 {
-  let url = `${API_URL}/api/public/repo/commits/${username}/${repository}/${oid}/latest`
+  let url = `${API_URL}/public/repo/commits/${username}/${repository}/${oid}/latest`
 
   const apiResponse = await fetch(url, {
     method: "GET",
