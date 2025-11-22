@@ -9,14 +9,21 @@ services:
       - app-network
     env_file:
       - ./django/backend/.env
-    secrets:
-      - django_db 
-  git:
-    build: ./git-server
+  git-http:
+    build: ./git-server/http/
     volumes:
       - git-data:/srv/git
     ports:
       - "8080:80"
+    networks:
+      - app-network
+
+  git-ssh:
+    build: ./git-server/ssh/ 
+    volumes:
+      - git-data:/srv/git
+    ports:
+      - "2222:22"
     networks:
       - app-network
 
@@ -26,7 +33,7 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-      - git
+      - git-http
     networks:
       - app-network
 
