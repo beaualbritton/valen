@@ -1,3 +1,4 @@
+from os import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -6,6 +7,7 @@ from pathlib import Path
 from pygit2 import Repository, Commit, Tree, repository
 from api.lib.git.peel import peel_commit, peel_blob, peel_tree
 from api.lib.server.directory import get_user_dir
+from api.models import Repository as Repository_Model
 
 GIT_ROOT = Path("/srv/git")
 
@@ -24,7 +26,14 @@ def create_repository(request):
         subprocess.run(["git", "init", "--bare", repo_path])
         subprocess.run(["touch", f"{repo_path}/git-daemon-export-ok"])
         subprocess.run(["git", "--git-dir", repo_path, "config", "http.receivepack", "true"])
-        subprocess.run(["chown", "-R", "www-data:www-data", repo_path])
+
+        subprocess.run(["chmod", "-R", "g+rwX", repo_path])
+        subprocess.run(["find", str(repo_path), "-type", "d", "-exec", "chmod", "2775", "{}", "+"])
+        subprocess.run(["find", str(repo_path), "-type", "f", "-exec", "chmod", "664", "{}", "+"])
+
+        # public by default, no collaborators
+        new_repo = Repository_Model(owner=user, repo_name=f"{user}/{repository_name}", public=True)
+        new_repo.save()
 
         return Response({"status": True, "message": f"repository {repository_name} created successfully."})
 

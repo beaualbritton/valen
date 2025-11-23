@@ -21,6 +21,7 @@ from api.views import fetch_repository, fetch_repos_by_user
 from api.views import fetch_commits_for_repo, fetch_commits_for_object, fetch_latest_commit_for_object
 from api.views import fetch_all_branches, fetch_default_branch
 from api.views import create_token, delete_token, list_tokens, git_authentication
+from api.views import ssh_validation, add_ssh_key
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,6 +32,8 @@ urlpatterns = [
     path('api/logout/', logout_user),
     path('api/user/', get_user),
     path('api/auth/git/', git_authentication),
+    path('api/auth/ssh/', ssh_validation),
+    path('api/public/ssh/add', add_ssh_key),
     path('api/public/token/create/', create_token),
     path('api/public/token/delete/', delete_token),
     path('api/public/token/list/', list_tokens),
