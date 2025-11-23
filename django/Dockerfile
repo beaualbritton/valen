@@ -18,6 +18,8 @@ COPY backend/ .
 
 EXPOSE 8000
 
+#match http/ssh for proper repo fetching
+RUN useradd -m -u 1001 -s /bin/bash git && usermod -aG git www-data && git config --system --add safe.directory '*'
 
 USER www-data
 

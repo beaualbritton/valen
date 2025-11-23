@@ -1,4 +1,5 @@
 import base64
+from api.views import repository
 from rest_framework.decorators import api_view
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -11,7 +12,10 @@ from django.middleware.csrf import get_token
 from api.serializers import UserSerializer
 from api.models import Profile
 from api.lib.server.directory import create_user_dir
-from api.models import Token
+from api.lib.git.resolve import resolve_repo_path
+from api.models import Token, Repository
+from pathlib import Path
+
 # aliases
 create_user = User.objects.create_user
 
@@ -128,3 +132,70 @@ def get_user(request):
         return Response({"status": False, "message": "not logged in"})
 
     return Response({"status": True, "user": UserSerializer(user).data})
+
+@csrf_exempt
+@api_view(['POST'])
+def ssh_validation(request):
+    # sent from validate_ssh script 
+    user = request.data.get("username")
+    command = request.data.get("command")
+
+    # TODO: resolve repo name from command path
+    repo_name = resolve_repo_path(command)
+
+    repo = Repository.objects.get(repo_name=repo_name)
+    
+    user = User.objects.get(username=user)
+    print(user.username)
+    print(command)
+    print(repo.repo_name)
+
+    if "git-upload-pack" in command:
+        # TODO: check if public or private 
+        print("clone")
+        if repo.public:
+            print("public")
+            return Response({"allowed": True})
+        #TODO: collaborators
+        elif (user == repo.owner):
+            print("private but owner ")
+            return Response({"allowed": True})
+        else:
+            print("private")
+
+    elif "git-receive-pack" in command:
+        # TODO: push only allowed if user is owner or collaborator
+        print("push")
+        # TODO: collaborators
+        if (user == repo.owner):
+            print("owner push")
+            return Response({"allowed": True})
+        else:
+            print("anon push")
+
+    return Response({"allowed": False})
+
+
+@api_view(["POST"])
+def add_ssh_key(request):
+    # authorized keys are stored here, identify each key with a user 
+    AUTHORIZED_KEYS = Path("/srv/git/.ssh/authorized_keys")
+
+    try:
+        # sent from git server for ssh validation
+        pub_key = request.POST.get('public_key')
+        pub_key = pub_key.strip()
+
+        if pub_key.startswith("ssh"):
+            # write to authorized_keys
+            line = f'environment="SSH_USER={request.user.username}",command="/usr/local/bin/validate_ssh" {pub_key}'
+
+            with open(AUTHORIZED_KEYS, 'a') as key_file:
+                key_file.write(f"{line}\n")
+        else:
+            raise Exception("not a valid key")
+
+        return Response({"status": True})
+
+    except Exception:
+        return Response({"status": False})
