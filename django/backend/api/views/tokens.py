@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User, make_password
 from api.models import Token 
-import secrets
+import secrets, hashlib
 
 @api_view(["POST"])
 def create_token(request):
@@ -27,7 +27,7 @@ def create_token(request):
     # 32 bytes for 0-255 len token
     token = secrets.token_urlsafe(32)
     # using django's pw hash/salt
-    hash = make_password(token)
+    hash = hashlib.sha256(token.encode()).hexdigest()
 
     token_entry = Token(user=user, name=name, hash=hash, creation=creation, expiration=expiration)
     token_entry.save()

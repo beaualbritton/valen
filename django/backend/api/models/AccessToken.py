@@ -8,3 +8,6 @@ class Token(models.Model):
     hash = models.CharField(max_length=255)
     creation = models.DateTimeField()
     expiration = models.DateTimeField()
+
+    class Meta:
+        indexes = [models.Index(fields=['user', 'hash'])]
