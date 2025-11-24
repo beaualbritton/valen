@@ -50,8 +50,15 @@ def delete_repository(request):
     repository_name = request.data.get("repository")
     if get_user_dir(user.username):
         repo_path = Path(GIT_ROOT/user.username/f"{repository_name}.git")
-        subprocess.run(["rm","-rf", repo_path])
+        subprocess.run(["rm", "-rf", repo_path])
+
+        repo_entry = Repository_Model.objects.get(repo_name=f"{user.username}/{repository_name}")
+
+        if repo_entry:
+            repo_entry.delete()
+
         return Response({"status": True, "message": f"repository {repository_name} deleted successfully."})
+
     else:
         return Response ({"status": False, "message": f"repository {repository_name} does not exist."})
 
@@ -85,15 +92,96 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
 
 
 @api_view(["GET"])
-def fetch_repos_by_user(request, username):
-    user_exists: bool = User.objects.filter(username=username).exists()
-    if not user_exists:
+def fetch_repos_by_user(request):
+    try:
+        username = request.data.get("username")
+        fetch_user = User.objects.get(username=username)
+
+        if not fetch_user:
+            raise Exception
+
+        all_repositories = Repository_Model.objects.filter(owner=fetch_user)
+        repo_list = []
+
+        if (fetch_user == request.user) and request.user.is_authenticated:
+            for repo in all_repositories:
+                repo_list.append(repo.repo_name)
+        else:
+            for repo in all_repositories:
+                if repo.public:
+                    repo_list.append(repo.repo_name)
+
+        return Response({"status": True, "repositories": repo_list})
+
+    except Exception:
         return Response({"status": False, "message": f"{username} doesn't exist", "repositories": None})
 
-    user_dir = Path(GIT_ROOT/username)
-    repos = []
-    for child in user_dir.iterdir():
-        if child.is_dir():
-            repos.append(child.stem)
 
-    return Response({"status": True, "repositories": repos})
+@api_view(["GET"])
+def list_collaborators(request):
+    try:
+        repo_name = request.data.get("repository")
+        repo_entry = Repository_Model.objects.get(repo_name=repo_name)
+        collaborators = []
+
+        for c in repo_entry.collaborators.all():
+            collaborators.append(c.username)
+
+        return Response({"status": True, "collaborators": collaborators, "count": len(collaborators)})
+
+    except Exception:
+        return Response ({"status": False, "collaborators": None, "message": "error fetching collaborators"})
+
+
+@api_view(["POST"])
+def add_collaborator(request):
+    try:
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"status": False, "message": "not logged in"})
+
+        repo_name = request.data.get("repository")
+        repo_entry = Repository_Model.objects.get(repo_name=repo_name)
+
+        if user != repo_entry.owner:
+            raise Exception
+
+        collaborator = request.data.get("collaborator")
+        collaborator_entry = User.objects.get(username=collaborator)
+
+        if not collaborator_entry:
+            raise Exception
+
+        repo_entry.collaborators.add(collaborator_entry)
+
+        return Response({"status": True, "collaborator": collaborator})
+
+    except Exception:
+        return Response({"status": False, "message": "error adding collaborator"})
+
+
+@api_view(["POST"])
+def remove_collaborator(request):
+    try:
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"status": False, "message": "not logged in"})
+
+        repo_name = request.data.get("repository")
+        repo_entry = Repository_Model.objects.get(repo_name=repo_name)
+
+        if user != repo_entry.owner:
+            raise Exception
+
+        collaborator = request.data.get("collaborator")
+        collaborator_entry = User.objects.get(username=collaborator)
+
+        if not collaborator_entry:
+            raise Exception
+
+        repo_entry.collaborators.remove(collaborator_entry)
+
+        return Response({"status": True, "removed": collaborator})
+
+    except Exception:
+        return Response({"status": False, "message": "error removing collaborator"})

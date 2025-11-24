@@ -102,10 +102,10 @@ def git_authentication(request):
 
     repo_key = f"repo_key:{repo_name}"
     repo = cache.get(repo_key)
+
     if repo is None:
         repo = Repository.objects.get(repo_name=repo_name)
         cache.set(repo_key, repo, 30)
-
 
     user = None
     is_valid = False
@@ -123,7 +123,7 @@ def git_authentication(request):
 
             if cached_result:
                 user, is_valid = cached_result
-                
+
             else:
                 user = User.objects.get(username=username)
                 is_valid = Token.objects.filter(user=user, hash=auth_token_hash).exists()
@@ -131,30 +131,28 @@ def git_authentication(request):
 
             if not is_valid:
                 return authenticate_res
+
         except Exception:
             return authenticate_res
 
-    
     if "git-upload-pack" in uri:
         if repo.public:
-            print("public")
             return HttpResponse(status=200)
 
-        #TODO: collaborators
         elif user and (user == repo.owner):
-            print("private but owner")
-
             if is_valid:
                 return HttpResponse(status=200)
 
-        else:
-            print("private")
+        elif user and repo.collaborators.contains(user):
+            if is_valid:
+                return HttpResponse(status=200)
 
     if "git-receive-pack" in uri:
-        #TODO: collaborators
         if user and (user == repo.owner):
-            print("owner push")
+            if is_valid:
+                return HttpResponse(status=200)
 
+        elif user and repo.collaborators.contains(user):
             if is_valid:
                 return HttpResponse(status=200)
 
@@ -169,42 +167,36 @@ def get_user(request):
 
     return Response({"status": True, "user": UserSerializer(user).data})
 
+
 @csrf_exempt
 @api_view(['POST'])
 def ssh_validation(request):
-    # sent from validate_ssh script 
+    # sent from validate_ssh script
     user = request.data.get("username")
     command = request.data.get("command")
 
     repo_name = resolve_repo_ssh(command)
 
     repo = Repository.objects.get(repo_name=repo_name)
-    
+
     user = User.objects.get(username=user)
-    print(user.username)
-    print(command)
-    print(repo.repo_name)
 
     if "git-upload-pack" in command:
-        print("clone")
         if repo.public:
-            print("public")
             return Response({"allowed": True})
-        #TODO: collaborators
+
         elif (user == repo.owner):
-            print("private but owner ")
             return Response({"allowed": True})
-        else:
-            print("private")
+
+        elif user and repo.collaborators.contains(user):
+            return Response({"allowed": True})
 
     elif "git-receive-pack" in command:
-        print("push")
-        # TODO: collaborators
         if (user == repo.owner):
-            print("owner push")
             return Response({"allowed": True})
-        else:
-            print("anon push")
+
+        elif user and repo.collaborators.contains(user):
+            return Response({"allowed": True})
 
     return Response({"allowed": False})
 

@@ -50,7 +50,7 @@ def delete_token(request):
     token_entry = Token.objects.get(hash=hash)
 
     if token_entry:
-        token.delete()
+        token_entry.delete()
 
     return Response({"status": True, "message": "deleted token"})
 
