@@ -163,7 +163,7 @@ def git_authentication(request):
 def get_user(request):
     user = request.user
     if not user or not user.is_authenticated:
-        return Response({"status": False, "message": "not logged in"})
+        return Response({"status": False, "message": "not logged in", "user": None})
 
     return Response({"status": True, "user": UserSerializer(user).data})
 

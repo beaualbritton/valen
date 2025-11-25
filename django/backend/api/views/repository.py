@@ -1,4 +1,5 @@
 from os import name
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -91,7 +92,8 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
     return Response({"status": False, "message": "not a valid git object"})
 
 
-@api_view(["GET"])
+@csrf_exempt
+@api_view(["POST"])
 def fetch_repos_by_user(request):
     try:
         username = request.data.get("username")
@@ -114,7 +116,7 @@ def fetch_repos_by_user(request):
         return Response({"status": True, "repositories": repo_list})
 
     except Exception:
-        return Response({"status": False, "message": f"{username} doesn't exist", "repositories": None})
+        return Response({"status": False, "message": f"user doesn't exist", "repositories": None})
 
 
 @api_view(["GET"])
