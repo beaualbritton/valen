@@ -28,12 +28,15 @@ services:
       - app-network
 
   frontend:
-    build: ./svelte
+    build:
+      context: ./svelte
+      dockerfile: Dockerfile.dev
     ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-      - git-http
+      - "5173:5173"
+    volumes:
+      - ./svelte/frontend:/frontend
+      - /frontend/node_modules
+    command: ["npm", "run", "dev", "--", "--host", "--port", "5173"]
     networks:
       - app-network
 
