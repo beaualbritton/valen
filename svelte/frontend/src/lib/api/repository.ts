@@ -37,12 +37,14 @@ export async function fetchRepository(username:string, repository: string, objec
 
 export async function fetchAllRepositories(username: string)
 {
-  let url = `${API_URL}/public/repo/all/${username}/`
+  let url = `${API_URL}/public/repo/all/`
 
   const apiResponse = await fetch(url, {
-    method: "GET",
+    method: "POST",
     headers: { "Content-Type": "application/json"},
     credentials: "include",
+
+    body: JSON.stringify({ username })
   }); 
 
   let repositoryResponse = await apiResponse.json();
