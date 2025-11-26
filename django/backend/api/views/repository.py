@@ -19,6 +19,9 @@ def create_repository(request):
         return Response({"status": False, "message": "not logged in"})
 
     repository_name = request.data.get("repository")
+    description = request.data.get("description")
+    is_public = request.data.get("visible")
+
     if get_user_dir(user.username):
 
         repo_path = Path(GIT_ROOT/user.username/f"{repository_name}.git")
@@ -32,7 +35,7 @@ def create_repository(request):
         subprocess.run(["find", str(repo_path), "-type", "f", "-exec", "chmod", "664", "{}", "+"])
 
         # public by default, no collaborators
-        new_repo = Repository_Model(owner=user, repo_name=f"{user}/{repository_name}", public=True)
+        new_repo = Repository_Model(owner=user, repo_name=f"{user}/{repository_name}", description=description, public=is_public)
         new_repo.save()
 
         return Response({"status": True, "message": f"repository {repository_name} created successfully."})
