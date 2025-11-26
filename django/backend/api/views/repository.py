@@ -91,7 +91,7 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
     return Response({"status": False, "message": "not a valid git object"})
 
 
-@api_view(["GET"])
+@api_view(["POST"])
 def fetch_repos_by_user(request):
     try:
         username = request.data.get("username")
