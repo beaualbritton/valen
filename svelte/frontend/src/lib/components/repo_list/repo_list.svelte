@@ -7,7 +7,7 @@ let { repoList, user = $bindable()} : {repoList: string[], user: string} = $prop
     <table>
       <tbody>
         <tr>
-          <td> <a href="/{user}/{repo}" class="hover:underline">{repo}</a></td>
+          <td> <a href="/{repo}" class="hover:underline">{repo}</a></td>
         </tr>
       </tbody>
     </table>

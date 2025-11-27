@@ -2,19 +2,16 @@
 let { commits, handleRefetch = $bindable()} : {commits: any, handleRefetch: (objectId: string) => void} = $props()
 </script>
 
-<main class = "border-black/80 border-2 rounded-lg h-64 overflow-scroll">
-  <table>
-    <thead>
-      <tr><th>commits</th></tr>
-    </thead>
-    <tbody>
-        {#each commits as commit}
-          <tr>
-            <td><a onclick={() => handleRefetch(commit.oid)} class="hover:underline">{commit?.author}: {commit?.message} </a></td>
-            <td>@ {new Date(commit?.time * 1000).toLocaleDateString()}</td>
-          </tr>
-        {/each}
-    </tbody>
-  </table>
-</main>
-
+<div class="w-sm bg-elevated border border-main rounded-lg p-4">
+  <h3 class="text-lg font-semibold text-green mb-3">Commits</h3>
+  <div class="space-y-3">
+    {#each commits as commit}
+      <button onclick={() => handleRefetch(commit.oid)} class="w-full text-left p-3 rounded bg-surface border border-main transition-all duration-150 hover:brightness-110 active:scale-95 active:brightness-90">
+        <div class="text-main font-medium mb-1">{commit.message}</div>
+        <div class="text-muted text-sm">
+          {commit.author} · {new Date(commit.time * 1000).toLocaleDateString()}
+        </div>
+      </button>
+    {/each}
+  </div>
+</div>

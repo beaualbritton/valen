@@ -30,24 +30,24 @@ async function getLatestFromObject(objectId : string)
   const query = `?oid=${encodeURIComponent(objectId)}`;
   const latestResponse = await fetch(`/${user}/${repoName}/latest${query}`);
   const latest = await latestResponse.json();
-  console.log(latest)
   return latest;
 }
 </script>
 
-<main>
-  <div class = "min-h-screen flex flex-row items-center justify-center">
-    <div class = "flex-col w-2/3">
-      {#if root.type ==="blob"}
+<main class="bg-main min-h-screen p-6">
+  <div class="min-h-screen flex flex-row gap-6 items-start justify-center">
+    <div class="flex flex-col gap-4 w-2/3 items-center justify-center min-h-screen">
+      <FileTree root={root} handleRefetch={refetch} getLatest={getLatestFromObject} />
+      {#if root.type === "blob"}
         {#key root.oid}
           <FileView blob={root}/>
         {/key}
       {/if}
-      <FileTree root={root} handleRefetch={refetch} getLatest={getLatestFromObject} />
     </div>
-    <div class = "w-1/3 flex flex-col">
+
+    <div class="flex flex-col gap-4 w-1/3 items-center justify-center min-h-screen">
       <CommitList commits={commits} handleRefetch={refetch}/>
       <BranchList branches={branches} defaultBranch={defaultBranch} handleRefetch={refetch}/>
     </div>
   </div>
- </main>
+</main>
