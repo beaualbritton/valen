@@ -1,3 +1,59 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+*{
+  font-family: 'Cascadia Mono', monospace;
+}
+
+
+@layer base {
+  :root {
+    --bg: #2d353b;
+    --bg-elevated: #343f44;
+    --bg-surface: #3d484d;
+    --border: #475258;
+    
+    --text: #d3c6aa;
+    --text-muted: #859289;
+    
+    --green: #a7c080;
+    --red: #e67e80;
+    --yellow: #dbbc7f;
+    --blue: #7fbbb3;
+    --orange: #e69875;
+    --purple: #d699b6;
+    --aqua: #83c092;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+  }
+  
+  ::selection {
+    background-color: #543a48;
+  }
+}
+
+@layer utilities {
+  .bg-main { background-color: var(--bg); }
+  .bg-elevated { background-color: var(--bg-elevated); }
+  .bg-surface { background-color: var(--bg-surface); }
+  
+  .text-main { color: var(--text); }
+  .text-muted { color: var(--text-muted); }
+  
+  .border-main { border-color: var(--border); }
+  
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-yellow { color: var(--yellow); }
+  .text-blue { color: var(--blue); }
+  .text-orange { color: var(--orange); }
+  .text-purple { color: var(--purple); }
+  .text-aqua { color: var(--aqua); }
+  .bg-green { background-color: var(--green); }
+  .bg-red { background-color: var(--red); }
+  .bg-yellow { background-color: var(--yellow); }
+  .bg-blue { background-color: var(--blue); }
+}

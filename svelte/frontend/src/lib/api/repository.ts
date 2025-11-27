@@ -1,14 +1,15 @@
 import { API_URL } from "$lib/config";
 import { getCsrf } from "$lib/api/login";
 
-export async function createRepository(repository: string)
+export async function createRepository(repository: string | null, description:string | null, visible: boolean | null, cookies: any)
 {
-  let csrfToken = await getCsrf();
+
+  const { sessionId, csrfToken } = cookies;
   const apiResponse = await fetch(`${API_URL}/public/repo/create/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken},
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
     credentials: "include",
-    body: JSON.stringify({ repository })
+    body: JSON.stringify({ repository, description, visible})
 
   });
 

@@ -7,6 +7,7 @@ let {onSubmit = $bindable()} : {onSubmit: (username: string, password: string, e
 async function handleSubmit(event: any)
 {
   event.preventDefault();
+
   response = await onSubmit(username,password,event);
 }
 
