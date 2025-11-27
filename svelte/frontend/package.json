@@ -40,6 +40,7 @@
 		"vite": "^7.1.12"
 	},
 	"dependencies": {
+		"@fontsource/cascadia-mono": "^5.2.3",
 		"svelte-highlight": "^7.9.0"
 	}
 }
