@@ -38,9 +38,10 @@ $effect(() => {
     //"Immediately Invoked Function Expression." Basically crackhead javascript https://developer.mozilla.org/en-US/docs/Glossary/IIFE
     ();
 });
+console.log(root.oid)
 </script>
 
-<main class = "border-black/80 border-2 rounded-lg w-1/2">
+<main class="bg-elevated border border-main rounded-lg overflow-hidden">
   {#if root.type === "blob" && lastRoot}
     {@render table(lastRoot)}
   {:else}
@@ -49,22 +50,22 @@ $effect(() => {
 </main>
 
 {#snippet table(root: any)}
-<table>
-  <tbody>
+<table class="w-2xl">
+  <tbody class="w-xl divide-y">
     {#each root.entries as entry}
-      <tr>
-        <td>
-          <a onclick={() => handleRefetch(entry.oid)} class="hover:underline">{entry.name}</a>
+      <tr class="hover:bg-surface transition-colors duration-150">
+        <td class="px-4 py-3">
+          <a onclick={() => handleRefetch(entry.oid)} class="hover:text-green hover:underline">{entry.name}</a>
         </td>
-        <td>
+        <td class="px-4 py-3 text-muted text-sm">
           {#if entryMap[entry.oid]}
-            <a class="justify-center hover:underline">
-              {entryMap[entry.oid].response.commits.author}: 
-              {entryMap[entry.oid].response.commits.message} @ 
-              {new Date(entryMap[entry.oid].response.commits.time * 1000).toLocaleDateString()}
-            </a>
+            <div class="flex flex-row gap-1 items-center justify-center">
+              <span class="text-main">{entryMap[entry.oid].response.commits.author}</span>
+              <span>{entryMap[entry.oid].response.commits.message}</span>
+              <span class="text-xs">{new Date(entryMap[entry.oid].response.commits.time * 1000).toLocaleDateString()}</span>
+            </div>
           {:else}
-            Loading…
+            <span class="text-yellow">Loading…</span>
           {/if}
         </td>
       </tr>

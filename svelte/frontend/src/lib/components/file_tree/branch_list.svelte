@@ -2,22 +2,21 @@
 let { branches, defaultBranch, handleRefetch = $bindable()} : {branches: any, defaultBranch: any, handleRefetch: (objectId: string) => void} = $props()
 </script>
 
+<div class="w-sm bg-elevated border border-main rounded-lg p-4">
+  <h3 class="text-lg font-semibold text-green mb-3">Branches</h3>
+  
+  <div class="space-y-2">
+    <button 
+      onclick={() => handleRefetch(defaultBranch.oid)} class="w-full text-left px-3 py-2 rounded bg-surface border border-main text-main font-medium transition-all duration-150 hover:brightness-110 active:scale-95 active:brightness-90">
+      <span class="text-green">★</span> {defaultBranch.branch} 
+      <span class="text-muted text-sm ml-2">(default)</span>
+    </button>
 
-<main class = "border-black/80 border-2 rounded-lg ">
-  <table>
-    <thead>
-      <tr><th>branches</th></tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><a onclick={() => handleRefetch(defaultBranch.oid)} class="hover:underline">default:{defaultBranch.branch}</a></td>
-        </tr>
-        {#each branches as branch}
-          <tr>
-            <td><a onclick={() => handleRefetch(branch.oid)} class="hover:underline">{branch.branch}</a></td>
-          </tr>
-        {/each}
-    </tbody>
-  </table>
-</main>
-
+    {#each branches as branch}
+      <button 
+        onclick={() => handleRefetch(branch.oid)} class="w-full text-left px-3 py-2 rounded bg-surface border border-main text-main transition-all duration-150 hover:brightness-110 active:scale-95 active:brightness-90">
+        {branch.branch}
+      </button>
+    {/each}
+  </div>
+</div>
