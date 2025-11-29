@@ -46,7 +46,7 @@ def delete_token(request):
     if not token:
         return Response({"status": False, "message": "token not provided"})
 
-    token_entry = Token.objects.get(user=user, name=token)
+    token_entry = Token.objects.filter(user=user, name=token).first()
 
     if token_entry:
         token_entry.delete()
