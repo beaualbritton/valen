@@ -208,7 +208,7 @@ def add_ssh_key(request):
 
     try:
         # sent from git server for ssh validation
-        pub_key = request.POST.get('public_key')
+        pub_key = request.data.get('public_key')
         pub_key = pub_key.strip()
 
         if pub_key.startswith("ssh"):
