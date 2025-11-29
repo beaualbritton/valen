@@ -46,7 +46,7 @@ def delete_token(request):
     if not token:
         return Response({"status": False, "message": "token not provided"})
 
-    hash = make_password(token)
+    hash = hashlib.sha256(token.encode()).hexdigest()
     token_entry = Token.objects.get(hash=hash)
 
     if token_entry:
