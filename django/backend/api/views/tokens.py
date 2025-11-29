@@ -46,13 +46,12 @@ def delete_token(request):
     if not token:
         return Response({"status": False, "message": "token not provided"})
 
-    hash = hashlib.sha256(token.encode()).hexdigest()
-    token_entry = Token.objects.get(hash=hash)
+    token_entry = Token.objects.get(user=user, name=token)
 
     if token_entry:
         token_entry.delete()
 
-    return Response({"status": True, "message": "deleted token"})
+    return Response({"status": True, "message": f"deleted token {token}"})
 
 
 @api_view(["GET"])
