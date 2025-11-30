@@ -36,13 +36,14 @@ export async function fetchRepository(username:string, repository: string, objec
   return {response: repositoryResponse};
 }
 
-export async function fetchAllRepositories(username: string)
+export async function fetchAllRepositories(username: string, cookies: any)
 {
+  const { sessionId, csrfToken } = cookies;
   let url = `${API_URL}/public/repo/info/${username}`
 
   const apiResponse = await fetch(url, {
     method: "GET",
-    headers: { "Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
     credentials: "include",
   }); 
 

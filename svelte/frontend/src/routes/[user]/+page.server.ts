@@ -7,10 +7,15 @@ import { redirect } from '@sveltejs/kit'
  * Loading data on the server-side to save the client some work (when javascript gets dense). This is a proactive approach,
  * as I found that the smallest features required a decent bit of javascript (typescript, in this case) to interact with Django.
 */
-export const load : PageServerLoad = async ({params}) => 
+export const load : PageServerLoad = async ({params,cookies}) => 
 {
   const username = params.user;
-  const repoResponse = await fetchAllRepositories(username); 
+  
+  const csrfToken = cookies.get('csrftoken');
+  const sessionId = cookies.get('sessionid');
+
+
+  const repoResponse = await fetchAllRepositories(username, {csrfToken, sessionId}); 
   let {response} = repoResponse;
 
   console.log(response)
