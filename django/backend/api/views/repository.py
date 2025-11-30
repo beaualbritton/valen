@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 import subprocess
 from pathlib import Path
-from pygit2 import Repository, Commit, Tree, repository
+from pygit2 import Repository, Commit, Tree 
 from api.lib.git.peel import peel_commit, peel_blob, peel_tree
 from api.lib.server.directory import get_user_dir
 from api.models import Repository as Repository_Model
+from api.serializers import RepositorySerializer
 
 GIT_ROOT = Path("/srv/git")
 
@@ -67,9 +68,9 @@ def delete_repository(request):
 
 
 @api_view(["GET"])
-def fetch_repository(request, username, repository_name, oid="HEAD") -> Response :
+def fetch_repository(request, username, repository, oid="HEAD") -> Response :
 
-    repo_path = Path(GIT_ROOT/username/f"{repository_name}.git/")
+    repo_path = Path(GIT_ROOT/username/f"{repository}.git/")
     git_repo = Repository(str(repo_path))
 
     current_object = None
@@ -94,43 +95,64 @@ def fetch_repository(request, username, repository_name, oid="HEAD") -> Response
     return Response({"status": False, "message": "not a valid git object"})
 
 
-@api_view(["POST"])
-def fetch_repos_by_user(request):
+@api_view(["GET"])
+def fetch_repo_info(request, username, repository):
     try:
-        username = request.data.get("username")
+        repo_entry = Repository_Model.objects.get(repo_name=f"{username}/{repository}")
+        user = request.user
+        print(user)
+
+        if not repo_entry.public:
+
+            if not user.is_authenticated:
+                print("not authenticated")
+                raise Exception
+
+            if (user != repo_entry.owner) and user not in repo_entry.collaborators.all():
+                print("not owner or collaborator")
+                raise Exception
+
+        repo_serializer = RepositorySerializer(repo_entry)
+        return Response({"status": True, "data": repo_serializer.data})
+
+    except Exception:
+        return Response({"status": False, "message": "not authorized"})
+
+
+@api_view(["GET"])
+def fetch_repos_by_user(request, username):
+    try:
         fetch_user = User.objects.get(username=username)
 
         if not fetch_user:
             raise Exception
 
-        all_repositories = Repository_Model.objects.filter(owner=fetch_user)
-        repo_list = []
-
         if (fetch_user == request.user) and request.user.is_authenticated:
-            for repo in all_repositories:
-                repo_list.append(repo.repo_name)
+            all_repositories = Repository_Model.objects.filter(owner=fetch_user)
         else:
-            for repo in all_repositories:
-                if repo.public:
-                    repo_list.append(repo.repo_name)
+            all_repositories = Repository_Model.objects.filter(owner=fetch_user, public=True)
 
-        return Response({"status": True, "repositories": repo_list})
+        serializer = RepositorySerializer(all_repositories, many=True)
+        
+        return Response({"status": True, "repositories": serializer.data})
 
-    except Exception:
-        return Response({"status": False, "message": f"{username} doesn't exist", "repositories": None})
+    except Exception as e:
+        return Response({"status": False, "message": f"error {e}", "repositories": None})
 
 
 @api_view(["GET"])
-def list_collaborators(request):
+def list_collaborators(request, username, repository):
     try:
-        repo_name = request.data.get("repository")
-        repo_entry = Repository_Model.objects.get(repo_name=repo_name)
+        repo_entry = Repository_Model.objects.get(repo_name=f"{username}/{repository}")
         collaborators = []
 
         for c in repo_entry.collaborators.all():
             collaborators.append(c.username)
 
-        return Response({"status": True, "collaborators": collaborators, "count": len(collaborators)})
+        if not collaborators:
+            return Response({"status": False, "message": "no collaborators to list", "collaborators": None})
+
+        return Response({"status": True, "collaborators": collaborators})
 
     except Exception:
         return Response ({"status": False, "collaborators": None, "message": "error fetching collaborators"})
@@ -144,12 +166,17 @@ def add_collaborator(request):
             return Response({"status": False, "message": "not logged in"})
 
         repo_name = request.data.get("repository")
-        repo_entry = Repository_Model.objects.get(repo_name=repo_name)
+        repo_owner = request.data.get("owner")
+        print(repo_name)
+        print(repo_owner)
+        repo_entry = Repository_Model.objects.get(repo_name=f"{repo_owner}/{repo_name}")
+
 
         if user != repo_entry.owner:
             raise Exception
 
         collaborator = request.data.get("collaborator")
+        print(collaborator)
         collaborator_entry = User.objects.get(username=collaborator)
 
         if not collaborator_entry:
@@ -159,8 +186,8 @@ def add_collaborator(request):
 
         return Response({"status": True, "collaborator": collaborator})
 
-    except Exception:
-        return Response({"status": False, "message": "error adding collaborator"})
+    except Exception as e:
+        return Response({"status": False, "message": f"error adding collaborator {e}"})
 
 
 @api_view(["POST"])
@@ -171,12 +198,16 @@ def remove_collaborator(request):
             return Response({"status": False, "message": "not logged in"})
 
         repo_name = request.data.get("repository")
-        repo_entry = Repository_Model.objects.get(repo_name=repo_name)
+        repo_owner = request.data.get("owner")
+        print(repo_name)
+        print(repo_owner)
+        repo_entry = Repository_Model.objects.get(repo_name=f"{repo_owner}/{repo_name}")
 
         if user != repo_entry.owner:
             raise Exception
 
         collaborator = request.data.get("collaborator")
+        print(collaborator)
         collaborator_entry = User.objects.get(username=collaborator)
 
         if not collaborator_entry:
@@ -184,7 +215,33 @@ def remove_collaborator(request):
 
         repo_entry.collaborators.remove(collaborator_entry)
 
-        return Response({"status": True, "removed": collaborator})
+        return Response({"status": True, "collaborator": collaborator})
 
-    except Exception:
-        return Response({"status": False, "message": "error removing collaborator"})
+    except Exception as e:
+        return Response({"status": False, "message": f"error removing collaborator {e}"})
+
+
+@api_view(["POST"])
+def change_privacy(request):
+    try:
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"status": False, "message": "not logged in"})
+
+        privacy_bool = request.data.get("public")
+        repo_name = request.data.get("repository")
+        repo_owner = request.data.get("owner")
+        repo_entry = Repository_Model.objects.get(repo_name=f"{repo_owner}/{repo_name}")
+
+        if user != repo_entry.owner:
+            raise Exception
+
+        repo_entry.public = bool(privacy_bool)
+        repo_entry.save()
+        repo_serializer = RepositorySerializer(repo_entry)
+
+        return Response({"status": True, "data": repo_serializer.data, "message": f"{repo_name} changed to {'public' if bool(privacy_bool) else 'private'}"})
+
+    except Exception as e:
+        return Response({"status": False, "data": None, "message": f"error chaging privacy {e}"})
+        
