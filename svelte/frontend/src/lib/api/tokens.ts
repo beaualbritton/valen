@@ -50,8 +50,6 @@ export async function addSSHKey(public_key: string, cookies: any)
 {
 
   const { sessionId, csrfToken } = cookies;
-  const form = new FormData();
-  form.append("public_key", public_key);
   const apiResponse = await fetch(`${API_URL}/public/ssh/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},

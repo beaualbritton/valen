@@ -46,6 +46,7 @@ async function getLatestFromObject(objectId : string)
     </div>
 
     <div class="flex flex-col gap-4 w-1/3 items-center justify-center min-h-screen">
+      <a href ={`/${user}/${repoName}/settings`}>settings</a>
       <CommitList commits={commits} handleRefetch={refetch}/>
       <BranchList branches={branches} defaultBranch={defaultBranch} handleRefetch={refetch}/>
     </div>
