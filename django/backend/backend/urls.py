@@ -17,12 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from api.views import check, create_repository, register_user, login_user, csrf_token, logout_user, get_user
-from api.views import fetch_repository, fetch_repos_by_user
+from api.views import fetch_repository, fetch_repo_info, fetch_repos_by_user
 from api.views import fetch_commits_for_repo, fetch_commits_for_object, fetch_latest_commit_for_object
 from api.views import fetch_all_branches, fetch_default_branch
 from api.views import create_token, delete_token, list_tokens, git_authentication
 from api.views import ssh_validation, add_ssh_key
 from api.views import list_collaborators, add_collaborator, remove_collaborator
+from api.views import change_privacy
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,14 +42,17 @@ urlpatterns = [
     path('api/public/token/delete/', delete_token),
     path('api/public/token/list/', list_tokens),
 
-    path('api/public/repo/collaborators/', list_collaborators),
+    path('api/public/repo/collaborators/<str:username>/<str:repository>/', list_collaborators),
     path('api/public/repo/collaborators/add/', add_collaborator),
     path('api/public/repo/collaborators/remove/', remove_collaborator),
 
+    path('api/public/repo/privacy/', change_privacy),
+
     path('api/public/repo/create/', create_repository),
-    path('api/public/repo/by/<str:username>/<str:repository_name>/', fetch_repository),
-    path('api/public/repo/by/<str:username>/<str:repository_name>/<str:oid>/', fetch_repository),
-    path('api/public/repo/all/', fetch_repos_by_user),
+    path('api/public/repo/by/<str:username>/<str:repository>/', fetch_repository),
+    path('api/public/repo/by/<str:username>/<str:repository>/<str:oid>/', fetch_repository),
+    path('api/public/repo/info/<str:username>/', fetch_repos_by_user),
+    path('api/public/repo/info/<str:username>/<str:repository>/', fetch_repo_info),
 
     path('api/public/repo/commits/<str:username>/<str:repository>/', fetch_commits_for_repo),
     path('api/public/repo/commits/<str:username>/<str:repository>/<str:oid>/', fetch_commits_for_object),
