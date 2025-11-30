@@ -1,5 +1,5 @@
 <script lang="ts">
-let {repository, toggle, handleToggle = $bindable()} : {toggle:boolean, handleToggle(): void, repository: string}= $props()
+let {owner, repository, toggle, handleToggle = $bindable()} : {toggle:boolean, handleToggle(): void, repository: string, owner:string}= $props()
 let collaborator = $state("");
 
 async function submit(e: Event)
@@ -9,7 +9,7 @@ async function submit(e: Event)
   const creationResponse = await fetch(`/settings/repo/collaborators/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ repository, collaborator })
+    body: JSON.stringify({ owner, repository, collaborator })
   });
 
   console.log(await creationResponse.json())

@@ -1,6 +1,6 @@
 import { API_URL } from "$lib/config";
 
-export async function addCollaborator(repository: string, collaborator: string, cookies: any)
+export async function addCollaborator(owner: string, repository: string, collaborator: string, cookies: any)
 {
 
   const { sessionId, csrfToken } = cookies;
@@ -9,7 +9,7 @@ export async function addCollaborator(repository: string, collaborator: string, 
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
       credentials: "include", 
-      body: JSON.stringify({repository, collaborator})
+      body: JSON.stringify({owner, repository, collaborator})
   });
   let collaboratorResponse= await apiResponse.json();
   console.log(collaboratorResponse)
@@ -17,7 +17,7 @@ export async function addCollaborator(repository: string, collaborator: string, 
   return {response: collaboratorResponse};
 }
 
-export async function removeCollaborator(repository: string, collaborator: string, cookies: any)
+export async function removeCollaborator(owner: string, repository: string, collaborator: string, cookies: any)
 {
 
   const { sessionId, csrfToken } = cookies;
@@ -26,7 +26,7 @@ export async function removeCollaborator(repository: string, collaborator: strin
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
       credentials: "include", 
-      body: JSON.stringify({repository, collaborator})
+      body: JSON.stringify({owner, repository, collaborator})
   });
   let collaboratorResponse= await apiResponse.json();
   console.log(collaboratorResponse)
@@ -35,13 +35,12 @@ export async function removeCollaborator(repository: string, collaborator: strin
 }
 
 
-export async function listCollaborator(repository: string)
+export async function listCollaborator(owner: string, repository: string)
 {
-  const apiResponse = await fetch(`${API_URL}/public/repo/collaborators/`, {
+  const apiResponse = await fetch(`${API_URL}/public/repo/collaborators/${owner}/${repository}/`, {
       method: "GET",
       headers: { "Content-Type": "application/json"},
       credentials: "include", 
-      body: JSON.stringify({repository})
   });
   let collaboratorResponse= await apiResponse.json();
   console.log(collaboratorResponse)

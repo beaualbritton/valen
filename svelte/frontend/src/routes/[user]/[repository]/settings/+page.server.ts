@@ -1,16 +1,24 @@
 import type {PageServerLoad} from './$types'
-import { listTokens } from '$lib/api/tokens'
 import { getUser } from '$lib/api/login';
-export const load : PageServerLoad = async ({cookies, fetch}) => 
+import { fetchRepoInfo } from '$lib/api/repository';
+
+export const load : PageServerLoad = async ({cookies, params}) => 
 {
   const csrfToken = cookies.get('csrftoken');
   const sessionId = cookies.get('sessionid');
 
   const userResponse = await getUser({csrfToken, sessionId});
-  let {user} = userResponse;
+  let {currentUser} = userResponse;
+
+  const {user, repository} = params;
+  
+  const infoResponse = await fetchRepoInfo(user, repository, {csrfToken, sessionId})
+  let {response} = infoResponse;
+  console.log(response)
+
 
   console.log('SERVER: csrfToken =', csrfToken);
   console.log('SERVER: sessionId =', sessionId);
   //TODO: Consider returning in a more elegant way
-  return { user: user};
+  return { response,user: currentUser};
 }

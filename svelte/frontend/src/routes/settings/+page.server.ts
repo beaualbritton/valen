@@ -10,10 +10,10 @@ export const load : PageServerLoad = async ({cookies, fetch}) =>
   let {response} = tokens;
 
   const userResponse = await getUser({csrfToken, sessionId});
-  let {user} = userResponse;
+  let {currentUser} = userResponse;
 
   console.log('SERVER: csrfToken =', csrfToken);
   console.log('SERVER: sessionId =', sessionId);
   //TODO: Consider returning in a more elegant way
-  return { response: response, user: user};
+  return { response: response, user: currentUser};
 }

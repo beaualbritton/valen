@@ -9,9 +9,10 @@ export const GET: RequestHandler = async ({ cookies}) =>
 
 
   const userResponse = await getUser({csrfToken, sessionId});
+  let {currentUser} = userResponse;
 
   //TODO: Consider returning in a more elegant way
-  return new Response(JSON.stringify(userResponse), {
+  return new Response(JSON.stringify(currentUser), {
     headers: { 'Content-Type': 'application/json' }
   });
 };

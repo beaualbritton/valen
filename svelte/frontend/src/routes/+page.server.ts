@@ -8,12 +8,12 @@ export const load : PageServerLoad = async ({cookies, fetch}) =>
 
 
   const userResponse = await getUser({csrfToken, sessionId});
-  let status: boolean = userResponse.user.status
+  let status: boolean = userResponse.currentUser.status
   let user = null;
 
   if(status)
   {
-    user = userResponse.user.user.username;
+    user = userResponse.currentUser.user.username;
   }
   //TODO: Consider returning in a more elegant way
   return { user: user, status: status};

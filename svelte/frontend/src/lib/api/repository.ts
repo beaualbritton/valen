@@ -38,16 +38,47 @@ export async function fetchRepository(username:string, repository: string, objec
 
 export async function fetchAllRepositories(username: string)
 {
-  let url = `${API_URL}/public/repo/all/`
+  let url = `${API_URL}/public/repo/info/${username}`
 
   const apiResponse = await fetch(url, {
-    method: "POST",
+    method: "GET",
     headers: { "Content-Type": "application/json"},
     credentials: "include",
-
-    body: JSON.stringify({ username })
   }); 
 
   let repositoryResponse = await apiResponse.json();
   return {response: repositoryResponse};
+}
+
+export async function fetchRepoInfo(username: string, repository: string, cookies: any)
+{
+
+  const { sessionId, csrfToken } = cookies;
+  let url = `${API_URL}/public/repo/info/${username}/${repository}`
+
+  const apiResponse = await fetch(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
+    credentials: "include",
+  }); 
+
+  let repositoryResponse = await apiResponse.json();
+  return {response: repositoryResponse};
+}
+
+export async function togglePrivacy(owner: string, repository: string, isPublic: boolean, cookies: any)
+{
+
+  const { sessionId, csrfToken } = cookies;
+  let url = `${API_URL}/public/repo/privacy/`
+
+  const apiResponse = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken, 'Cookie': `sessionid=${sessionId}; csrftoken=${csrfToken}`},
+    credentials: "include", 
+    body: JSON.stringify({owner, repository, public: isPublic})
+  }); 
+
+  let privacyResponse = await apiResponse.json();
+  return {response: privacyResponse};
 }
