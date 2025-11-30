@@ -11,6 +11,12 @@ let root = $derived(repository.response.object)
 let commits = $state(data.commits.response.commits)
 let branches = $state(data.branches.response.branches)
 let defaultBranch = $state(data.default.response.branches)
+let currentUser = $state()
+
+if (data.currentUser.status)
+{
+  currentUser = data.currentUser.user.username
+}
 
 $inspect(root)
 $inspect(defaultBranch)
@@ -46,6 +52,9 @@ async function getLatestFromObject(objectId : string)
     </div>
 
     <div class="flex flex-col gap-4 w-1/3 items-center justify-center min-h-screen">
+      {#if currentUser == user}
+        <a href ={`/${user}/${repoName}/settings`}>settings</a>
+      {/if}
       <CommitList commits={commits} handleRefetch={refetch}/>
       <BranchList branches={branches} defaultBranch={defaultBranch} handleRefetch={refetch}/>
     </div>

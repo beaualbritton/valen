@@ -1,5 +1,5 @@
 <script lang="ts">
-let { repoList, user = $bindable()} : {repoList: string[], user: string} = $props()
+let { repoList, user = $bindable()} : {repoList: any[], user: string} = $props()
 console.log(repoList)
 </script>
 
@@ -7,11 +7,11 @@ console.log(repoList)
   <div class="space-y-3">
     {#if repoList.length > 0}
       {#each repoList as repo}
-        <a class="w-full p-3 rounded bg-surface border border-main transition-all duration-150 hover:brightness-110 active:scale-95 active:brightness-90 flex items-center gap-2 " href="/{repo}">
+        <a class="w-full p-3 rounded bg-surface border border-main transition-all duration-150 hover:brightness-110 active:scale-95 active:brightness-90 flex items-center gap-2 " href="/{repo.repo_name}">
           <div class="flex-col">
-            <div class="text-main font-medium">{repo}</div>
+            <div class="text-main font-medium">{repo.repo_name}</div>
             <!-- TODO: descriptions for repos. maybe languages -->
-            <div class="text-muted text-sm">Description</div>
+            <div class="text-muted text-sm">{repo.description}</div>
           </div>
         </a>
       {/each}

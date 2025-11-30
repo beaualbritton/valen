@@ -19,7 +19,8 @@ async function checkAuthStatus()
   if (response.ok)
   {
     let userData = await response.json();
-    userData = userData.user;
+
+    console.log(userData);
     loggedIn= userData.status;
 
     if(loggedIn)
@@ -29,6 +30,9 @@ async function checkAuthStatus()
 
     loading = false
   }
+
+  console.log(loggedIn)
+  console.log(user)
 }
 const logoutAndRefresh = async() => {await logout(); location.reload();}
 const handleDropdown = () => dropdownActive = !dropdownActive;

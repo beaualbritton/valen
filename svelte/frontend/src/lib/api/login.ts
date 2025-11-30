@@ -65,5 +65,5 @@ export async function getUser(cookies: any)
   });
   let userResponse= await apiResponse.json();
 
-  return {user: userResponse};
+  return {currentUser: userResponse};
 }
