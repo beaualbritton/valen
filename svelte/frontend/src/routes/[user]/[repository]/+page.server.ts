@@ -29,12 +29,15 @@ export const load : PageServerLoad = async ({ params, url, fetch, cookies}) =>
   const infoResponse = await fetchRepoInfo(user, repository, {csrfToken, sessionId})
   let {response} = infoResponse;
   console.log(response)
-
-  if(response.data.public != true)
+  
+  const isPublic = response.data.public;
+  const owner = response.data.owner;
+  const current = currentUser.user.username;
+  const collaborators = response.data.collaborators;
+  if(isPublic)
   {
-    if(currentUser.user.username !== response.data.owner)
+    if(!((current === owner) || (collaborators.includes(current))))
     {
-      console.log("private and not owner")
       throw error(404, 'Not Found');
     }
   }

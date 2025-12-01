@@ -2,6 +2,7 @@ from os import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from django.db.models import Q
 import subprocess
 from pathlib import Path
 from pygit2 import Repository, Commit, Tree 
@@ -130,7 +131,9 @@ def fetch_repos_by_user(request, username):
         if (fetch_user == request.user) and request.user.is_authenticated:
             all_repositories = Repository_Model.objects.filter(owner=fetch_user)
         else:
-            all_repositories = Repository_Model.objects.filter(owner=fetch_user, public=True)
+            # using django's Q object for complex queries, effectively OR logic for orm
+            # see: https://docs.djangoproject.com/en/5.2/topics/db/queries/#complex-lookups-with-q-objects
+            all_repositories = Repository_Model.objects.filter(owner=fetch_user).filter(Q(public=True) | Q(collaborators=request.user)).distinct()
 
         serializer = RepositorySerializer(all_repositories, many=True)
         
