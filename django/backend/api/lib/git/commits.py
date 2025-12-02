@@ -13,7 +13,7 @@ def all_commits(git_repo) -> Response:
 
         for commit in git_repo.walk(branch_oid, GIT_SORT_TIME):
             # if commit has already been visited -- skip
-            if commit in visited_commits:
+            if commit.id in visited_commits:
                 continue
             visited_commits.add(commit.id)
             current_commit = commit.peel(Commit)
@@ -91,7 +91,7 @@ def find_latest_ref(git_repo, git_object, from_commit_oid) -> Response:
         is_tree = (type_str == "tree")
         prefix = f"{file_path}/" if is_tree and file_path else ""
 
-        for commit in git_repo.walk(from_commit_oid, GIT_SORT_TIME):
+        for commit in git_repo.walk(from_commit_oid, GIT_SORT_REVERSE):
             if not commit.parents:
                 if search_tree(git_repo, commit.tree, git_object.id):
                     latest_ref = {"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time}
