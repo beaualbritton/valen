@@ -1,6 +1,6 @@
 <script lang="ts">
 import FileView from "./file_view.svelte";
-let { root, handleRefetch, getLatest = $bindable()} : {root: any, handleRefetch: (objectId: string) => void, getLatest: any} = $props()
+let { root, handleRefetch, getLatest, commitHead= $bindable()} : {root: any, handleRefetch: (objectId: string) => void, getLatest: any, commitHead: any} = $props()
 
 // TypeScript utility sugar. Basically a Map object with types
 // https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type
@@ -50,19 +50,57 @@ console.log(root.oid)
 </main>
 
 {#snippet table(root: any)}
-<table class="w-2xl">
-  <tbody class="w-xl divide-y">
+<table class="w-3xl">
+  <thead class="bg-surface h-16">
+    <tr>
+      <th class="px-4 py-4 text-left font-medium text-yellow texl-xl"> <span class ="nf nf-seti-git text-red text-lg"></span> {commitHead.author}:</th>
+      <th class="px-4 py-4 text-left font-medium">
+        {#if commitHead}
+          <div class="grid grid-cols-6 gap-2 items-center">
+            <span class="col-span-4 text-main italic truncate whitespace-nowrap overflow-hidden text-ellipsis">
+              {commitHead.message.split('\n')[0]}
+            </span>
+
+            <span class="text-xs text-blue whitespace-nowrap hover:underline">
+              <span class="nf nf-cod-diff"></span> {commitHead.oid.substring(0,6)}
+            </span>
+            <span class="text-xs text-muted whitespace-nowrap">
+              {new Date(commitHead.time * 1000).toLocaleDateString()}
+            </span>
+          </div>
+        {:else}
+          <span class="text-yellow">Loading commit info…</span>
+        {/if}
+      </th>
+    </tr>
+  </thead>
+  <tbody class="w-xl divide-y divide-black/20">
     {#each root.entries as entry}
       <tr class="hover:bg-surface transition-colors duration-150">
         <td class="px-4 py-3">
-          <a onclick={() => handleRefetch(entry.oid)} class="hover:text-green hover:underline">{entry.name}</a>
+          <div class="flex items-start gap-2">
+            {#if entry.type === "tree"}
+              <span class="nf nf-fa-folder text-blue flex-shrink-0"></span>
+            {:else}
+              <span class="nf nf-fa-file text-yellow flex-shrink-0"></span>
+            {/if}
+            <a onclick={() => handleRefetch(entry.oid)} class="text-green font-bold hover:underline break-words">
+              {entry.name}
+            </a>
+          </div>
         </td>
         <td class="px-4 py-3 text-muted text-sm">
           {#if entryMap[entry.oid]}
-            <div class="flex flex-row gap-1 items-center justify-center">
-              <span class="text-main">{entryMap[entry.oid].response.commits.author}</span>
-              <span>{entryMap[entry.oid].response.commits.message}</span>
-              <span class="text-xs">{new Date(entryMap[entry.oid].response.commits.time * 1000).toLocaleDateString()}</span>
+            <div class="grid grid-cols-6 gap-2 items-center">
+              <span class="col-span-4 truncate italic overflow-hidden text-ellipsis text-main">
+                {entryMap[entry.oid].response.commits.message}
+              </span>
+              <span class="whitespace-nowrap overflow-hidden text-ellipsis">
+                {entryMap[entry.oid].response.commits.author}
+              </span>
+              <span class="text-xs whitespace-nowrap">
+                {new Date(entryMap[entry.oid].response.commits.time * 1000).toLocaleDateString()}
+              </span>
             </div>
           {:else}
             <span class="text-yellow">Loading…</span>

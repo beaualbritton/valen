@@ -2,7 +2,7 @@
 let {toggle, handleToggle, user= $bindable()} : {toggle:boolean, handleToggle(): void, user:string}= $props()
 let repository = $state("");
 let description = $state("");
-let visible = $state(false);
+let visible = $state(true);
 
 async function submit(e: Event)
 {
@@ -26,9 +26,7 @@ async function submit(e: Event)
         <div class="flex items-center justify-between mb-8">
           <h2 class = "text-3xl font-bold px-5">new repository</h2>
           <button onclick={handleToggle} class ="text-red hover:brightness-110 focus:brightness-90 transition-colors"aria-label="Close">
-            <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <span class = "nf nf-fa-close text-xl"></span>
           </button>
         </div>
         

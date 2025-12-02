@@ -7,6 +7,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+  <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css">
 </svelte:head>
 
 <Navbar/>

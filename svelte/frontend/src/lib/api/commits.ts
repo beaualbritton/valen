@@ -14,9 +14,9 @@ export async function fetchAllCommits(username: string, repository: string)
   return {response: commitResponse};
 }
 
-export async function fetchLatestCommitForObject(username: string, repository: string, oid: string | null)
+export async function fetchLatestCommitForObject(username: string, repository: string, oid: string | null, fromCommitOID: string | null)
 {
-  let url = `${API_URL}/public/repo/commits/${username}/${repository}/${oid}/latest`
+  let url = `${API_URL}/public/repo/commits/${username}/${repository}/${oid}/${fromCommitOID}/`
 
   const apiResponse = await fetch(url, {
     method: "GET",

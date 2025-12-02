@@ -41,7 +41,7 @@ const handleDropdown = () => dropdownActive = !dropdownActive;
 <nav class="flex flex-row justify-center items-center w-full h-12 bg-elevated shadow-xl border-b border-main fixed top-0 start-0 z-50">
   <div class="w-full px-8 flex flex-row justify-center items-center"> 
     <div class="flex flex-row w-1/2 justify-start items-center gap-2">
-      <h1 class="text-2xl text-green font-bold"><a href="/">valen</a></h1>
+      <h1 class="text-2xl text-green font-bold"><a href="/">valen</a> <span class="nf -ml-2 nf-dev-git text-s text-red"></span></h1>
       <span class = "text-lg text-yellow mt-0.5"> {#key path} {path} {/key}</span>
     </div>
     <div class="flex flex-row justify-end items-center w-3/4">

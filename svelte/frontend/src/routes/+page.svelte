@@ -19,10 +19,10 @@ const handleToggle = () => toggle = !toggle;
 
 {#snippet home()}
   <h1 class = "text-9xl font-semibold text-green">
-    valen
+    valen<span class="ml-4 nf nf-dev-git text-s text-red"></span>
   </h1>
 
-  <h2 class = "text-lg text-yellow">
+  <h2 class = "text-xl text-yellow">
     version control for everyone
   </h2>
 {/snippet}
