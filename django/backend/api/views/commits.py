@@ -27,8 +27,8 @@ def fetch_commits_for_object(request,username,repository,oid):
 
 
 @api_view(["GET"])
-def fetch_latest_commit_for_object(request, username, repository, oid):
+def fetch_latest_commit_for_object(request, username, repository, oid, relative_commit_oid):
     repo_path = Path(GIT_ROOT/username/f"{repository}.git")
     git_repo = Repository(str(repo_path))
     git_object = git_repo.revparse_single(oid)
-    return find_latest_ref(git_repo, git_object)
+    return find_latest_ref(git_repo, git_object, relative_commit_oid)
