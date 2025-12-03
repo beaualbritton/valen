@@ -3,7 +3,6 @@ import FileTree from "$lib/components/file_tree/file_tree.svelte";
 import CommitList from "$lib/components/file_tree/commit_list.svelte";
 import BranchList from "$lib/components/file_tree/branch_list.svelte";
 import FileView from "$lib/components/file_tree/file_view.svelte";
-import CreateButton from "$lib/components/dashboard/CreateButton.svelte";
 let {data} = $props()
 let repository = $state(data.repoData)
 let user = $state(data.username)
@@ -16,22 +15,29 @@ let currentUser = $state()
 let commitOID = $state(root.oid)
 let rootType = $derived(root.type)
 let commitHead = $state(root)
+
+let blobToggle = $state(false);
+const handleBlobToggle = () => { blobToggle = !blobToggle}
+
 if (data.currentUser.status)
 {
   currentUser = data.currentUser.user.username
 }
 
-$effect(() => {
-  if (rootType === "commit") {
-    if (commitOID !== root.oid) {
+$effect(() =>
+{
+  if (rootType === "commit") 
+  {
+    if (commitOID !== root.oid) 
+    {
       commitOID = root.oid;
     }
-    // Update commitHead to the current commit
     commitHead = root;
   }
 });
 
-$effect(() => {
+$effect(() => 
+{
   if (rootType === "tree") 
   {
     getLatestFromObject(root.oid).then(result => 
@@ -40,6 +46,20 @@ $effect(() => {
     });
   }
 });
+
+$effect(() =>  
+{
+  if (rootType === "blob")
+  {
+    getLatestFromObject(root.oid).then(result => 
+    {
+      commitHead = result.response.commits;
+    });
+
+    blobToggle = true;
+  }
+});
+
 async function refetch(objectId : string) 
 {
   // Calling internal server function with this fetch, see ./refetch/+server.ts 
@@ -59,8 +79,14 @@ async function getLatestFromObject(objectId : string)
 }
 </script>
 
-<main class="bg-main min-h-screen p-6">
-  <div class="min-h-screen flex flex-row gap-6 items-start justify-center">
+{#if blobToggle}
+  {#key root.oid}
+    <FileView blob={root} toggle={blobToggle} handleToggle={handleBlobToggle} commitHead={commitHead}/>
+  {/key}
+{/if}
+
+<main class="bg-main min-h-screen pt-16 transition-all duration-500" class:blur-md={blobToggle}>
+  <div class="min-h-screen flex flex-row items-start justify-center">
     <div class="flex flex-col gap-4 w-2/3 items-center justify-center min-h-screen">
       <div class = "w-3xl flex gap-4 flex-row justify-end">
         <button class="bg-surface border border-main text-green px-4 py-2 rounded font-medium transition-all duration-150 active:scale-95 active:brightness-90 hover:brightness-110">
@@ -74,11 +100,6 @@ async function getLatestFromObject(objectId : string)
         {/if}
       </div>
       <FileTree root={root} handleRefetch={refetch} getLatest={getLatestFromObject} commitHead={commitHead}/>
-      {#if root.type === "blob"}
-        {#key root.oid}
-          <FileView blob={root}/>
-        {/key}
-      {/if}
     </div>
 
     <div class="flex flex-col gap-4 w-1/3 items-center justify-center min-h-screen">
