@@ -1,0 +1,122 @@
+/* svelte-highlight uses highlight.js so custom themes can be hand rolled 
+* frankensteined this from docs and filled in hex codes from everforest repo 
+* See: https://github.com/sainnhe/everforest/blob/master/palette.md#highlights 
+* and: https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html
+* and: https://highlightjs.readthedocs.io/en/latest/theme-guide.html*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+  background: #272E33;
+  color: #D3C6AA;
+}
+
+/* Base text */
+.hljs-subst {
+  color: #D3C6AA;
+}
+
+/* Comments */
+.hljs-comment {
+  color: #859289;
+  font-style: italic;
+}
+
+/* Keywords, important */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta .hljs-keyword,
+.hljs-doctag,
+.hljs-section,
+.hljs-name,
+.hljs-strong {
+  color: #E67E80;
+  font-weight: bold;
+}
+
+/* Types, built-ins */
+.hljs-type,
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #DBBC7F;
+}
+
+/* Strings */
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #A7C080;
+}
+
+/* Numbers */
+.hljs-number,
+.hljs-literal {
+  color: #D699B6;
+}
+
+/* Functions, classes */
+.hljs-title.function_,
+.hljs-title.class_,
+.hljs-title.class,
+.hljs-function {
+  color: #7FBBB3;
+}
+
+/* Variables, parameters, properties */
+.hljs-variable,
+.hljs-params,
+.hljs-attr,
+.hljs-property {
+  color: #D3C6AA;
+}
+
+/* Regex, symbols, special */
+.hljs-regexp,
+.hljs-symbol,
+.hljs-link {
+  color: #83C092;
+}
+
+/* Tags (HTML/XML) */
+.hljs-tag {
+  color: #7FBBB3;
+}
+
+/* Punctuation, operators */
+.hljs-punctuation,
+.hljs-operator {
+  color: #E69875;
+}
+
+/* Attributes, meta strings */
+.hljs-meta,
+.hljs-meta .hljs-string {
+  color: #DBBC7F;
+}
+
+/* Deletion */
+.hljs-deletion {
+  color: #E67E80;
+  background: #493B40;
+}
+
+/* Addition */
+.hljs-addition {
+  color: #A7C080;
+  background: #3C4841;
+}
+
+/* Emphasis */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+/* Selection */
+.hljs ::selection {
+  background-color: #4C3743;
+}

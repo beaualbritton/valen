@@ -29,8 +29,6 @@ async function submit(e: Event)
             <span class = "nf nf-fa-close text-xl"></span>
           </button>
         </div>
-        
-        
         <div class="w-full flex justify-center">
           <div class="w-xl space-y-4">
             <div class="flex items-center gap-4">

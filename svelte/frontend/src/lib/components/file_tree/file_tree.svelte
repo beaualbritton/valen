@@ -53,11 +53,17 @@ console.log(root.oid)
 <table class="w-3xl">
   <thead class="bg-surface h-16">
     <tr>
-      <th class="px-4 py-4 text-left font-medium text-yellow texl-xl"> <span class ="nf nf-seti-git text-red text-lg"></span> {commitHead.author}:</th>
+
+    <th class="px-4 py-4 text-left font-medium text-yellow text-md">
+      <div class="flex items-center gap-2">
+        <span class="nf nf-seti-git text-red text-lg flex-shrink-0"></span>
+        <span class="truncate block">{commitHead.author}:</span>
+      </div>
+    </th>
       <th class="px-4 py-4 text-left font-medium">
         {#if commitHead}
           <div class="grid grid-cols-6 gap-2 items-center">
-            <span class="col-span-4 text-main italic truncate whitespace-nowrap overflow-hidden text-ellipsis">
+            <span class="col-span-4 text-main italic text-md truncate whitespace-nowrap overflow-hidden text-ellipsis">
               {commitHead.message.split('\n')[0]}
             </span>
 
