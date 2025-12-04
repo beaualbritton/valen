@@ -9,17 +9,24 @@ from api.lib.git.branch import get_branches, get_default_branch
 GIT_ROOT = Path("/srv/git")
 
 
-#TODO: validate user/repo lib function returning t/f if both user and repo exist
 @api_view(["GET"])
 def fetch_all_branches(request, username, repository):
-    repo_path = Path(GIT_ROOT/username/f"{repository}.git")
-    git_repo = Repository(str(repo_path))
-    return get_branches(git_repo)
+    try:
+        repo_path = Path(GIT_ROOT/username/f"{repository}.git")
+        git_repo = Repository(str(repo_path))
+        return get_branches(git_repo)
+
+    except Exception as e:
+        return Response({"status": False, "message": e})
 
 
 @api_view(["GET"])
 def fetch_default_branch(request, username, repository):
-    repo_path = Path(GIT_ROOT/username/f"{repository}.git")
-    git_repo = Repository(str(repo_path))
-    return get_default_branch(git_repo)
+    try:
+        repo_path = Path(GIT_ROOT/username/f"{repository}.git")
+        git_repo = Repository(str(repo_path))
+        return get_default_branch(git_repo)
+
+    except Exception as e:
+        return Response({"status": False, "message": e})
 

@@ -2,32 +2,45 @@ from pygit2 import Repository, Commit, GIT_SORT_TIME, GIT_SORT_REVERSE
 from rest_framework.response import Response
 
 
-# find all commits in a repo
+# retrieves all commits for a given repository
 def all_commits(git_repo) -> Response:
-    commits = []
-    visited_commits = set()
+    try:
+        commits = []
+        visited_commits = set()
 
-    for branches in git_repo.branches.local:
-        branch = git_repo.branches[branches]
-        branch_oid = branch.target
+        for branches in git_repo.branches.local:
+            branch = git_repo.branches[branches]
+            branch_oid = branch.target
 
-        for commit in git_repo.walk(branch_oid, GIT_SORT_TIME):
-            # if commit has already been visited -- skip
-            if commit.id in visited_commits:
-                continue
-            visited_commits.add(commit.id)
-            current_commit = commit.peel(Commit)
-            commits.append({"oid": str(current_commit.id),"author": current_commit.author.name,"message": current_commit.message,"time": current_commit.commit_time})
+            for commit in git_repo.walk(branch_oid, GIT_SORT_TIME):
+                # if commit has already been visited -- skip
+                if commit.id in visited_commits:
+                    continue
+                visited_commits.add(commit.id)
 
-    # was stuck on this one for a while, want to sort commits by commit_time, git_sort_time isn't doing this
-    # see: https://stackoverflow.com/questions/72899/how-can-i-sort-a-list-of-dictionaries-by-a-value-of-the-dictionary-in-python
-    commits.sort(key=(lambda commit: commit["time"]), reverse=True)
-    return Response({"status": True, "commits": commits})
+                current_commit = commit.peel(Commit)
+
+                commit_data = {"oid": str(current_commit.id),
+                               "author": current_commit.author.name,
+                               "message": current_commit.message,
+                               "time": current_commit.commit_time}
+
+                commits.append(commit_data)
+
+        # was stuck on this one for a while, want to sort commits by commit_time, git_sort_time isn't doing this
+        # see: https://stackoverflow.com/questions/72899/how-can-i-sort-a-list-of-dictionaries-by-a-value-of-the-dictionary-in-python
+        commits.sort(key=(lambda commit: commit["time"]), reverse=True)
+        return Response({"status": True, "commits": commits})
+
+    except Exception as e:
+        return Response({"status": False, "commits": None,
+                         "message": f"error fetching all commits {e}"})
 
 
 # given an object id, walk the tree and find commits that contain object
 def find_commit_refs(git_repo, git_object) -> Response:
     try:
+        # resolve object id to a filepath, a file's sha hash (oid) changes when modified
         path = resolve_file_path(git_repo, git_object.id)
 
         if not path:
@@ -36,6 +49,7 @@ def find_commit_refs(git_repo, git_object) -> Response:
         file_path, type_str = path
         is_tree = (type_str == "tree")
         prefix = f"{file_path}/" if is_tree and file_path else ""
+
         commits = []
         visited_commits = set()
 
@@ -47,9 +61,14 @@ def find_commit_refs(git_repo, git_object) -> Response:
                     continue
                 visited_commits.add(commit.id)
 
+                commit_data = {"oid": str(commit.id),
+                               "author": commit.author.name,
+                               "message": commit.message,
+                               "time": commit.commit_time}
+
                 if not commit.parents:
                     if search_tree(git_repo, commit.tree, git_object.id):
-                        commits.append({"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time})
+                        commits.append(commit_data)
                     continue
 
                 parent = commit.parents[0]
@@ -62,14 +81,16 @@ def find_commit_refs(git_repo, git_object) -> Response:
                     # finding commits that modify or 'touch' a blob or tree
                     if not is_tree:
                         if new_path == file_path or old_path == file_path:
-                            commits.append({"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time})
+                            commits.append(commit_data)
                             break
+
                     else:
                         if not file_path:
-                            commits.append({"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time})
+                            commits.append(commit_data)
                             break
+
                         if (new_path.startswith(prefix) or old_path.startswith(prefix)):
-                            commits.append({"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time})
+                            commits.append(commit_data)
                             break
 
         commits.sort(key=(lambda commit: commit["time"]), reverse=True)
@@ -92,9 +113,14 @@ def find_latest_ref(git_repo, git_object, from_commit_oid) -> Response:
         prefix = f"{file_path}/" if is_tree and file_path else ""
 
         for commit in git_repo.walk(from_commit_oid, GIT_SORT_REVERSE):
+            commit_data = {"oid": str(commit.id),
+                           "author": commit.author.name,
+                           "message": commit.message,
+                           "time": commit.commit_time}
+
             if not commit.parents:
                 if search_tree(git_repo, commit.tree, git_object.id):
-                    latest_ref = {"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time}
+                    latest_ref = commit_data
                 continue
 
             parent = commit.parents[0]
@@ -107,15 +133,19 @@ def find_latest_ref(git_repo, git_object, from_commit_oid) -> Response:
                 # finding commits that modify or 'touch' a blob or tree
                 if not is_tree:
                     if new_path == file_path or old_path == file_path:
-                        latest_ref = {"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time}
+                        latest_ref = commit_data
+                        break
                 else:
                     if not file_path:
-                        latest_ref = {"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time}
+                        latest_ref = commit_data
+                        break
 
                     if (new_path.startswith(prefix) or old_path.startswith(prefix)):
-                        latest_ref = {"oid": str(commit.id), "author": commit.author.name, "message": commit.message, "time": commit.commit_time}
+                        latest_ref = commit_data
+                        break
 
         return Response({"status": True, "commits": latest_ref})
+
     except Exception as e:
         return Response({"status": False, "error": str(e)})
 

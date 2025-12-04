@@ -13,22 +13,36 @@ GIT_ROOT = Path("/srv/git")
 #TODO: validate user/repo lib function returning t/f if both user and repo exist
 @api_view(["GET"])
 def fetch_commits_for_repo(request,username,repository):
-    repo_path = Path(GIT_ROOT/username/f"{repository}.git")
-    git_repo = Repository(str(repo_path))
-    return all_commits(git_repo)
+    try:
+        repo_path = Path(GIT_ROOT/username/f"{repository}.git")
+        git_repo = Repository(str(repo_path))
+        return all_commits(git_repo)
+
+    except Exception as e:
+        return Response({"status": False, "message": e})
 
 
 @api_view(["GET"])
 def fetch_commits_for_object(request,username,repository,oid):
-    repo_path = Path(GIT_ROOT/username/f"{repository}.git")
-    git_repo = Repository(str(repo_path))
-    git_object = git_repo.revparse_single(oid)
-    return find_commit_refs(git_repo, git_object)
+    try:
+        repo_path = Path(GIT_ROOT/username/f"{repository}.git")
+        git_repo = Repository(str(repo_path))
+        git_object = git_repo.revparse_single(oid)
+        return find_commit_refs(git_repo, git_object)
+
+    except Exception as e:
+        return Response({"status": False, "message": e})
 
 
 @api_view(["GET"])
 def fetch_latest_commit_for_object(request, username, repository, oid, relative_commit_oid):
-    repo_path = Path(GIT_ROOT/username/f"{repository}.git")
-    git_repo = Repository(str(repo_path))
-    git_object = git_repo.revparse_single(oid)
-    return find_latest_ref(git_repo, git_object, relative_commit_oid)
+    try:
+        repo_path = Path(GIT_ROOT/username/f"{repository}.git")
+        git_repo = Repository(str(repo_path))
+        git_object = git_repo.revparse_single(oid)
+        return find_latest_ref(git_repo, git_object, relative_commit_oid)
+
+    except Exception as e:
+        return Response({"status": False, "message": e})
+
+

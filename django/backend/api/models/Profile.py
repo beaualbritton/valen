@@ -6,12 +6,12 @@ from django.contrib.auth.models import User
 def profile_path(this, filename):
     return f"profile_images/user_{this.user.id}/{filename}"
 
+# NOT CURRENTLY IN USE!
 class Profile(models.Model):
     # Every Profile has a User
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     about = models.CharField(blank=True)
     # ImageField (stored as a filepath).
-    # Django suggests the python module pillow for configuration.
     picture = models.ImageField(upload_to='api.models.profile_path', blank=True)
     # A Profile can have many Profiles following it. 
     # Relating followers to following

@@ -16,84 +16,95 @@ GIT_ROOT = Path("/srv/git")
 
 @api_view(["POST"])
 def create_repository(request):
-    user = request.user
-    if not user.is_authenticated:
-        return Response({"status": False, "message": "not logged in"})
+    try:
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"status": False, "message": "not logged in"})
 
-    repository_name = request.data.get("repository")
-    description = request.data.get("description")
-    is_public = request.data.get("visible")
+        repository_name = request.data.get("repository")
+        description = request.data.get("description")
+        is_public = request.data.get("visible")
 
-    if get_user_dir(user.username):
+        if get_user_dir(user.username):
 
-        repo_path = Path(GIT_ROOT/user.username/f"{repository_name}.git")
+            repo_path = Path(GIT_ROOT/user.username/f"{repository_name}.git")
 
-        subprocess.run(["git", "init", "--bare", repo_path])
-        subprocess.run(["touch", f"{repo_path}/git-daemon-export-ok"])
-        subprocess.run(["git", "--git-dir", repo_path, "config", "http.receivepack", "true"])
+            subprocess.run(["git", "init", "--bare", repo_path])
+            subprocess.run(["touch", f"{repo_path}/git-daemon-export-ok"])
+            subprocess.run(["git", "--git-dir", repo_path, "config", "http.receivepack", "true"])
 
-        subprocess.run(["chmod", "-R", "g+rwX", repo_path])
-        subprocess.run(["find", str(repo_path), "-type", "d", "-exec", "chmod", "2775", "{}", "+"])
-        subprocess.run(["find", str(repo_path), "-type", "f", "-exec", "chmod", "664", "{}", "+"])
+            subprocess.run(["chmod", "-R", "g+rwX", repo_path])
+            subprocess.run(["find", str(repo_path), "-type", "d", "-exec", "chmod", "2775", "{}", "+"])
+            subprocess.run(["find", str(repo_path), "-type", "f", "-exec", "chmod", "664", "{}", "+"])
 
-        # public by default, no collaborators
-        new_repo = Repository_Model(owner=user, repo_name=f"{user}/{repository_name}", description=description, public=is_public)
-        new_repo.save()
+            # public by default, no collaborators
+            new_repo = Repository_Model(owner=user, repo_name=f"{user}/{repository_name}", description=description, public=is_public)
+            new_repo.save()
 
-        return Response({"status": True, "message": f"repository {repository_name} created successfully."})
+            return Response({"status": True, "message": f"repository {repository_name} created successfully."})
+        else:
+            raise Exception 
 
-    else:
-        return Response({"status": False, "message": f"repository {repository_name} not created. Parent dir doesn't exist"})
+    except Exception as e:
+        Response({"status": False, "message": f"repository  not created. {e}"})
 
 
 @api_view(["POST"])
 def delete_repository(request):
-    user = request.user 
-    if not user.is_authenticated:
-        return Response({"status": False, "message": "not logged in"})
+    try:
+        user = request.user 
+        if not user.is_authenticated:
+            return Response({"status": False, "message": "not logged in"})
 
-    repository_name = request.data.get("repository")
-    if get_user_dir(user.username):
-        repo_path = Path(GIT_ROOT/user.username/f"{repository_name}.git")
-        subprocess.run(["rm", "-rf", repo_path])
+        repository_name = request.data.get("repository")
+        if get_user_dir(user.username):
+            repo_path = Path(GIT_ROOT/user.username/f"{repository_name}.git")
+            subprocess.run(["rm", "-rf", repo_path])
 
-        repo_entry = Repository_Model.objects.get(repo_name=f"{user.username}/{repository_name}")
+            repo_entry = Repository_Model.objects.get(repo_name=f"{user.username}/{repository_name}")
 
-        if repo_entry:
-            repo_entry.delete()
+            if repo_entry:
+                repo_entry.delete()
 
-        return Response({"status": True, "message": f"repository {repository_name} deleted successfully."})
+            return Response({"status": True, "message": f"repository {repository_name} deleted successfully."})
 
-    else:
-        return Response ({"status": False, "message": f"repository {repository_name} does not exist."})
+        else:
+            raise Exception("Repository doens't exist")
+
+    except Exception as e:
+        Response({"status": False, "message": f"repository  not created. {e}"})
 
 
 @api_view(["GET"])
-def fetch_repository(request, username, repository, oid="HEAD") -> Response :
+def fetch_repository(request, username, repository, oid="HEAD") -> Response:
+    try:
+        repo_path = Path(GIT_ROOT/username/f"{repository}.git/")
+        git_repo = Repository(str(repo_path))
 
-    repo_path = Path(GIT_ROOT/username/f"{repository}.git/")
-    git_repo = Repository(str(repo_path))
+        current_object = None
+        if oid == "HEAD":
+            head = git_repo[git_repo.head.target]
+            current_object = head
+        else:
+            current_object = git_repo.revparse_single(oid)
 
-    current_object = None
-    if oid == "HEAD":
-        head = git_repo[git_repo.head.target]
-        current_object = head
-    else:
-        current_object = git_repo.revparse_single(oid)
+        object_type = current_object.type_str
 
-    object_type = current_object.type_str
+        match object_type:
+            case "commit":
+                return peel_commit(current_object)
+            case "tree":
+                return peel_tree(current_object)
+            case "blob":
+                return peel_blob(current_object)
+            case "tag":
+                #TODO: implement
+                raise Exception("Tags not implemented. How'd you get here?")
 
-    match object_type:
-        case "commit":
-            return peel_commit(current_object)
-        case "tree":
-            return peel_tree(current_object)
-        case "blob":
-            return peel_blob(current_object)
-        case "tag":
-            #TODO: implement 
-            print("tag")
-    return Response({"status": False, "message": "not a valid git object"})
+        raise Exception("Not a valid git object!")
+
+    except Exception as e:
+        Response({"status": False, "message": f"Error. {e}"})
 
 
 @api_view(["GET"])
@@ -101,23 +112,20 @@ def fetch_repo_info(request, username, repository):
     try:
         repo_entry = Repository_Model.objects.get(repo_name=f"{username}/{repository}")
         user = request.user
-        print(user)
 
         if not repo_entry.public:
 
             if not user.is_authenticated:
-                print("not authenticated")
-                raise Exception
+                raise Exception("not authenticated")
 
             if (user != repo_entry.owner) and user not in repo_entry.collaborators.all():
-                print("not owner or collaborator")
-                raise Exception
+                raise Exception("not owner or collaborator")
 
         repo_serializer = RepositorySerializer(repo_entry)
         return Response({"status": True, "data": repo_serializer.data})
 
-    except Exception:
-        return Response({"status": False, "message": "not authorized"})
+    except Exception as e:
+        return Response({"status": False, "message": f"not authorized: {e}"})
 
 
 @api_view(["GET"])
@@ -153,12 +161,12 @@ def list_collaborators(request, username, repository):
             collaborators.append(c.username)
 
         if not collaborators:
-            return Response({"status": False, "message": "no collaborators to list", "collaborators": None})
+            raise Exception("No collaborators to list.")
 
         return Response({"status": True, "collaborators": collaborators})
 
-    except Exception:
-        return Response ({"status": False, "collaborators": None, "message": "error fetching collaborators"})
+    except Exception as e:
+        return Response({"status": False, "message": f"Error fetching collaborators: {e}", "collaborators": None})
 
 
 @api_view(["POST"])
@@ -170,27 +178,23 @@ def add_collaborator(request):
 
         repo_name = request.data.get("repository")
         repo_owner = request.data.get("owner")
-        print(repo_name)
-        print(repo_owner)
         repo_entry = Repository_Model.objects.get(repo_name=f"{repo_owner}/{repo_name}")
 
-
         if user != repo_entry.owner:
-            raise Exception
+            raise Exception("You must be the owner to add collaborators.")
 
         collaborator = request.data.get("collaborator")
-        print(collaborator)
         collaborator_entry = User.objects.get(username=collaborator)
 
         if not collaborator_entry:
-            raise Exception
+            raise Exception(f"Couldn't find user {collaborator}")
 
         repo_entry.collaborators.add(collaborator_entry)
 
         return Response({"status": True, "collaborator": collaborator})
 
     except Exception as e:
-        return Response({"status": False, "message": f"error adding collaborator {e}"})
+        return Response({"status": False, "message": f"Error: adding collaborator: {e}", "collaborator": None})
 
 
 @api_view(["POST"])
@@ -198,23 +202,20 @@ def remove_collaborator(request):
     try:
         user = request.user
         if not user.is_authenticated:
-            return Response({"status": False, "message": "not logged in"})
+            raise Exception("Not logged in")
 
         repo_name = request.data.get("repository")
         repo_owner = request.data.get("owner")
-        print(repo_name)
-        print(repo_owner)
         repo_entry = Repository_Model.objects.get(repo_name=f"{repo_owner}/{repo_name}")
 
         if user != repo_entry.owner:
-            raise Exception
+            raise Exception("You must be the owner to remove collaborators")
 
         collaborator = request.data.get("collaborator")
-        print(collaborator)
         collaborator_entry = User.objects.get(username=collaborator)
 
         if not collaborator_entry:
-            raise Exception
+            raise Exception(f"Couldn't find user {collaborator}")
 
         repo_entry.collaborators.remove(collaborator_entry)
 
@@ -229,15 +230,16 @@ def change_privacy(request):
     try:
         user = request.user
         if not user.is_authenticated:
-            return Response({"status": False, "message": "not logged in"})
+            raise Exception("Not logged in")
 
         privacy_bool = request.data.get("public")
+
         repo_name = request.data.get("repository")
         repo_owner = request.data.get("owner")
         repo_entry = Repository_Model.objects.get(repo_name=f"{repo_owner}/{repo_name}")
 
         if user != repo_entry.owner:
-            raise Exception
+            raise Exception("You must be the owner to change privacy")
 
         repo_entry.public = bool(privacy_bool)
         repo_entry.save()

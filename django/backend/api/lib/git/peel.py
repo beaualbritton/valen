@@ -27,8 +27,9 @@ def peel_commit(git_object) -> Response:
                 "entries": entry_list,
             }
         })
-    except Exception as error:
-        return Response({"status": False, "message": f"error: {error}"})
+
+    except Exception as e:
+        return Response({"status": False, "message": f"error inspecting commit: {e}"})
 
 
 def peel_tree(git_object) -> Response:
@@ -53,8 +54,9 @@ def peel_tree(git_object) -> Response:
                 "entries": entry_list,
             }
         })
-    except Exception as error:
-        return Response({"status": False, "message": f"error: {error}"})
+
+    except Exception as e:
+        return Response({"status": False, "message": f"error inspecting tree: {e}"})
 
 
 def peel_blob(git_object) -> Response:
@@ -70,7 +72,8 @@ def peel_blob(git_object) -> Response:
                 "entries": current_object.data.decode('utf-8')
             }
         })
-    except Exception as error:
-        return Response({"status": False, "message": f"error: {error}"})
+
+    except Exception as e:
+        return Response({"status": False, "message": f"error inspecting tree: {e}"})
 
 

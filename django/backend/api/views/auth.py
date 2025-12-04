@@ -28,53 +28,60 @@ def check(request):
 
 @api_view(["POST"])
 def register_user(request):
-    r_data = request.data
-    username = r_data.get("username")
-    password = r_data.get("password")
+    try:
+        r_data = request.data
+        username = r_data.get("username")
+        password = r_data.get("password")
 
-    if not username:
-        return Response({"status": False, "message": "enter a username please!"})
-    if not password:
-        return Response({"status": False, "message": "enter a password please!"})
+        if not username:
+            raise Exception("enter a username please!")
+        if not password:
+            raise Exception("enter a password please!")
 
-    user_exists: bool = User.objects.filter(username=username).exists()
+        user_exists: bool = User.objects.filter(username=username).exists()
 
-    if user_exists:
-        return Response({"status": False, "message": "username taken!"})
+        if user_exists:
+            raise Exception("username taken")
 
-    # At this point, no errors
-    new_user = create_user(username=username, password=password)
+        # At this point, no errors
+        new_user = create_user(username=username, password=password)
 
-    # Create folder for user in /srv/git 
-    user_dir = create_user_dir(username)
+        # Create folder for user in /srv/git 
+        user_dir = create_user_dir(username)
 
-    # Create a new Profile associated with new_user
-    new_profile = Profile.objects.create(user=new_user)
+        if not new_user:
+            raise Exception(f"failed to create user {username}")
+        elif not user_dir:
+            raise Exception(f"failed to create user directory for {username}")
 
-    if new_profile and user_dir:
         return Response({"status": True, "message": f"registration succesful for {username}"})
-    else:
-        return Response({"status": False, "message": f"registration unsuccesful for {username}"})
+
+    except Exception as e:
+        return Response({"status": False, "message": f"error registering: {e}"})
 
 
 @api_view(["POST"])
 def login_user(request):
-    r_data = request.data
-    username = r_data.get("username")
-    password = r_data.get("password")
+    try:
+        r_data = request.data
+        username = r_data.get("username")
+        password = r_data.get("password")
 
-    if not username:
-        return Response({"status": False, "message": "enter a username please!"})
-    if not password:
-        return Response({"status": False, "message": "enter a username please!"})
+        if not username:
+            raise Exception("enter a username please!")
+        if not password:
+            raise Exception("enter a password please!")
 
-    user_authenticated = authenticate(request, username=username, password=password)
+        user_authenticated = authenticate(request, username=username, password=password)
 
-    if user_authenticated:
-        login(request, user_authenticated)
-        return Response({"status": True, "message": f"login succesful for {username}"})
-    else:
-        return Response({"status": False, "message": f"invalid login for {username}"})
+        if user_authenticated:
+            login(request, user_authenticated)
+            return Response({"status": True, "message": f"login succesful for {username}"})
+        else:
+            raise Exception(f"invalid login for {username}")
+
+    except Exception as e:
+        return Response({"status": False, "message": f"error logging in: {e}"})
 
 
 @api_view(["POST"])
@@ -90,27 +97,33 @@ def csrf_token(request):
 
 @csrf_exempt
 def git_authentication(request):
-    # git sends tokens thru http -> Authorization: Basic <base64hash>
-    uri = request.META.get("HTTP_X_ORIGINAL_URI", "")
-    # return 401 with authenticate header by default
+    # return 401 with authenticate header request by default
     authenticate_res = HttpResponse(status=401)
     authenticate_res["WWW-Authenticate"] = 'Basic realm="Git"'
 
-    auth = request.META.get("HTTP_AUTHORIZATION", "")
+    try:
+        # git sends tokens thru http -> Authorization: Basic <base64hash>
+        uri = request.META.get("HTTP_X_ORIGINAL_URI", "")
+        # return 401 with authenticate header by default
 
-    repo_name = resolve_repo_http(uri)
+        auth = request.META.get("HTTP_AUTHORIZATION", "")
 
-    repo_key = f"repo_key:{repo_name}"
-    repo = cache.get(repo_key)
+        repo_name = resolve_repo_http(uri)
 
-    if repo is None:
-        repo = Repository.objects.get(repo_name=repo_name)
-        cache.set(repo_key, repo, 30)
+        repo_key = f"repo_key:{repo_name}"
+        repo = cache.get(repo_key)
 
-    user = None
-    is_valid = False
-    if auth.startswith("Basic "):
-        try:
+        if repo is None:
+            # caching repo as git makes several requests when pushing/pulling
+            # just save result for faster requests after the first
+            repo = Repository.objects.get(repo_name=repo_name)
+            cache.set(repo_key, repo, 30)
+
+        user = None
+        is_valid = False
+
+        if auth.startswith("Basic "):
+            # decoding b64 sent by http
             b64_decode = base64.b64decode(auth[6:]).decode()
             b64_decode = b64_decode.split(":", 1)
             username = b64_decode[0]
@@ -132,73 +145,80 @@ def git_authentication(request):
             if not is_valid:
                 return authenticate_res
 
-        except Exception:
-            return authenticate_res
-
-    if "git-upload-pack" in uri:
-        if repo.public:
-            return HttpResponse(status=200)
-
-        elif user and (user == repo.owner):
-            if is_valid:
+        if "git-upload-pack" in uri:
+            if repo.public:
                 return HttpResponse(status=200)
 
-        elif user and repo.collaborators.contains(user):
-            if is_valid:
-                return HttpResponse(status=200)
+            elif user and (user == repo.owner):
+                if is_valid:
+                    return HttpResponse(status=200)
 
-    if "git-receive-pack" in uri:
-        if user and (user == repo.owner):
-            if is_valid:
-                return HttpResponse(status=200)
+            elif user and repo.collaborators.contains(user):
+                if is_valid:
+                    return HttpResponse(status=200)
 
-        elif user and repo.collaborators.contains(user):
-            if is_valid:
-                return HttpResponse(status=200)
+        if "git-receive-pack" in uri:
+            if user and (user == repo.owner):
+                if is_valid:
+                    return HttpResponse(status=200)
 
-    return authenticate_res
+            elif user and repo.collaborators.contains(user):
+                if is_valid:
+                    return HttpResponse(status=200)
+        return authenticate_res
+
+    except Exception:
+        return authenticate_res
 
 
 @api_view(["GET"])
 def get_user(request):
-    user = request.user
-    if not user or not user.is_authenticated:
-        return Response({"status": False, "message": "not logged in"})
+    try:
+        user = request.user
+        if not user or not user.is_authenticated:
+            raise Exception("Not logged in")
 
-    return Response({"status": True, "user": UserSerializer(user).data})
+        return Response({"status": True, "user": UserSerializer(user).data})
 
+    except Exception as e:
+        return Response({"status": False, "message": f"Cant fetch user: {e}"})
 
 @csrf_exempt
 @api_view(['POST'])
 def ssh_validation(request):
-    # sent from validate_ssh script
-    user = request.data.get("username")
-    command = request.data.get("command")
+    try:
+        # sent from validate_ssh script
+        user = request.data.get("username")
+        command = request.data.get("command")
 
-    repo_name = resolve_repo_ssh(command)
+        repo_name = resolve_repo_ssh(command)
 
-    repo = Repository.objects.get(repo_name=repo_name)
+        repo = Repository.objects.get(repo_name=repo_name)
 
-    user = User.objects.get(username=user)
+        user = User.objects.get(username=user)
 
-    if "git-upload-pack" in command:
-        if repo.public:
-            return Response({"allowed": True})
+        if "git-upload-pack" in command:
+            if repo.public:
+                return Response({"allowed": True})
 
-        elif (user == repo.owner):
-            return Response({"allowed": True})
+            elif (user == repo.owner):
+                return Response({"allowed": True})
 
-        elif user and repo.collaborators.contains(user):
-            return Response({"allowed": True})
+            elif user and repo.collaborators.contains(user):
+                return Response({"allowed": True})
 
-    elif "git-receive-pack" in command:
-        if (user == repo.owner):
-            return Response({"allowed": True})
+        elif "git-receive-pack" in command:
+            if (user == repo.owner):
+                return Response({"allowed": True})
 
-        elif user and repo.collaborators.contains(user):
-            return Response({"allowed": True})
+            elif user and repo.collaborators.contains(user):
+                return Response({"allowed": True})
 
-    return Response({"allowed": False})
+        else:
+            raise Exception
+
+    except Exception:
+        return Response({"allowed": False})
 
 
 @api_view(["POST"])
@@ -222,5 +242,5 @@ def add_ssh_key(request):
 
         return Response({"status": True})
 
-    except Exception:
-        return Response({"status": False})
+    except Exception as e:
+        return Response({"status": False, "message": f"error: {e}"})
