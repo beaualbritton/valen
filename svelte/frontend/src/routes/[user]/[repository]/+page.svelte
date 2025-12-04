@@ -92,10 +92,7 @@ async function getLatestFromObject(objectId : string)
         <button class="bg-surface border border-main text-green px-4 py-2 rounded font-medium transition-all duration-150 active:scale-95 active:brightness-90 hover:brightness-110">
           <span class = "nf nf-fa-cloud_download "></span> clone
         </button>
-        <button class="bg-surface border border-main text-yellow px-4 py-2 rounded font-medium transition-all duration-150 active:scale-95 active:brightness-90 hover:brightness-110">
-          <span class = "nf nf-fa-map"></span> history 
-        </button>
-        {#if currentUser == user}
+       {#if currentUser == user}
           <a class="bg-surface border border-main text-muted px-4 py-2 rounded font-medium transition-all duration-150 active:scale-95 active:brightness-90 hover:brightness-110" href ={`/${user}/${repoName}/settings`}> <span class="nf-fa-cog"></span> settings</a>
         {/if}
       </div>

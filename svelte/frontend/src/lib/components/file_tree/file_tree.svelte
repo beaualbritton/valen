@@ -90,7 +90,7 @@ console.log(root.oid)
             {:else}
               <span class="nf nf-fa-file text-yellow flex-shrink-0"></span>
             {/if}
-            <a onclick={() => handleRefetch(entry.oid)} class="text-green font-bold hover:underline break-words">
+            <a onclick={() => handleRefetch(entry.oid)} class="text-green font-bold hover:underline break-words truncate block">
               {entry.name}
             </a>
           </div>
