@@ -15,7 +15,7 @@ subprocess.run(["find", SRV_GIT, "-type", "f", "-exec", "chmod", "664", "{}", "+
 
 # .ssh server dir
 subprocess.run(["mkdir", "-p", SRV_GIT_SSH])
-subprocess.run(["chmod", "770", SRV_GIT_SSH])
+subprocess.run(["chmod", "2770", SRV_GIT_SSH])
 subprocess.run(["chown", "git:www-data", SRV_GIT_SSH])
 
 if not Path(AUTH_SRV).exists():

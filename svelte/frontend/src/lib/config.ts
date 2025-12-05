@@ -1,6 +1,1 @@
-
-// src/lib/config.ts
-export const API_URL = import.meta.env.SSR 
-    ? "http://backend:8000/api"   // SSR runs inside frontend container, backend is reachable by service name
-    : "http://localhost:8000/api" // Browser runs on host at localhost:3000
-
+export const API_URL = import.meta.env.SSR ? "http://production-alb-996772037.us-east-2.elb.amazonaws.com/api":"/api"

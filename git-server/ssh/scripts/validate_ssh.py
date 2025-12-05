@@ -11,7 +11,8 @@ if not user or not cmd:
 
 header = {"Content-Type": "application/json"}
 body = json.dumps({"username": user, "command": cmd}).encode()
-request = Request("http://backend:8000/api/auth/ssh/", data=body, headers=header, )
+request = Request("http://production-alb-996772037.us-east-2.elb.amazonaws.com/api/auth/ssh/",
+                  data=body, headers=header)
 
 try:
     response = urlopen(request, timeout=10)
